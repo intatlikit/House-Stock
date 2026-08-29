@@ -6,7 +6,7 @@
 
 - **Frontend:** Vue 3.4+, TypeScript, Composition API, Composables (global state), Tailwind CSS v4
 - **Backend/DB:** Supabase (Postgres + Row Level Security)
-- **Deploy:** GitHub Actions (ยังไม่ตั้งค่า — ดู `SETUP.md`)
+- **Deploy:** GitHub Actions → GitHub Pages (ดูขั้นตอนเปิดใช้งานที่ `SETUP.md` ข้อ 6)
 
 ## เริ่มต้นใช้งาน
 

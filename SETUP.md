@@ -47,5 +47,38 @@ git push -u origin main
 
 ## ขั้นถัดไป (ยังไม่ได้ทำในรอบนี้)
 
-- **GitHub Actions pipeline** สำหรับ deploy อัตโนมัติ (fast lane) — ต้องรู้ก่อนว่าจะ deploy ไปที่ไหน (Vercel / Netlify / Cloudflare Pages ฯลฯ) เพื่อตั้ง secret ให้ตรง
 - Widget เพิ่มเติมในหน้า landing (มีพื้นที่เตรียมไว้ให้แล้วที่ `src/pages/LandingPage.vue` ส่วน `data-widget-area`)
+
+## 6. ตั้งค่า Deploy อัตโนมัติ (GitHub Actions → GitHub Pages)
+
+Pipeline อยู่ที่ `.github/workflows/deploy.yml` แล้ว ทุกครั้งที่ push เข้า branch `main` จะ build แล้ว deploy อัตโนมัติ แต่ต้องตั้งค่า **2 อย่าง** ใน GitHub ก่อนใช้งานได้จริง:
+
+### 6.1 เพิ่ม Secrets (สำหรับให้ build เชื่อม Supabase ได้)
+
+ไปที่ repo บน GitHub → **Settings** → **Secrets and variables** → **Actions** → **New repository secret** เพิ่ม 2 ตัว:
+
+| Name | Value |
+|---|---|
+| `VITE_SUPABASE_URL` | ค่าเดียวกับใน `.env` |
+| `VITE_SUPABASE_ANON_KEY` | ค่าเดียวกับใน `.env` |
+
+### 6.2 เปิดใช้ GitHub Pages แบบ "GitHub Actions"
+
+ไปที่ repo → **Settings** → **Pages** → หัวข้อ **Build and deployment** → **Source** เลือก **GitHub Actions** (ไม่ใช่ "Deploy from a branch")
+
+### 6.3 Push แล้วรอ
+
+```bash
+git add .
+git commit -m "ci: add GitHub Pages deploy pipeline"
+git push
+```
+
+ไปดูสถานะได้ที่แท็บ **Actions** ของ repo พอ deploy เสร็จ เว็บจะอยู่ที่:
+
+```
+https://intatlikit.github.io/House-Stock/
+```
+
+> หมายเหตุ: โปรเจกต์นี้ตั้ง router เป็น **hash mode** (URL จะมี `#` เช่น `/#/house/xxx`) เพราะ GitHub Pages เป็น static hosting ไม่รองรับ SPA history mode ตรงๆ — เข้าใจง่ายและกันหน้า 404 ตอน refresh ได้เลยโดยไม่ต้องตั้งค่าเพิ่ม
+

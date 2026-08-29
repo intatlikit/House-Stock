@@ -1,7 +1,10 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
+// ใช้ hash history (URL จะมี #) เพราะ GitHub Pages เป็น static hosting
+// ไม่รองรับ server-side rewrite ให้ SPA แบบ history mode ปกติ
+// รีเฟรชหน้า /#/house/xxx จะทำงานถูกต้องเสมอโดยไม่ต้องตั้งค่าเพิ่ม
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(),
   routes: [
     {
       path: '/',
