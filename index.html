@@ -11,6 +11,16 @@
       rel="stylesheet"
     />
     <title>House Stock — จัดการของใช้ในบ้าน</title>
+    <script>
+      // ตั้ง class "dark" ก่อน Vue mount เพื่อกันเว็บกระพริบสีผิดตอนโหลดหน้า (FOUC)
+      (function () {
+        try {
+          var stored = localStorage.getItem('house-stock-theme')
+          var isDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
+          if (isDark) document.documentElement.classList.add('dark')
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>

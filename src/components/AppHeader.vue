@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { APP_VERSION } from '@/lib/version'
+import { useTheme } from '@/composables/useTheme'
+
+const { theme, toggleTheme } = useTheme()
 </script>
 
 <template>
@@ -12,6 +15,14 @@ import { APP_VERSION } from '@/lib/version'
 
     <div class="flex items-center gap-3">
       <slot name="actions" />
+      <button
+        type="button"
+        class="rounded-full p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)]"
+        :aria-label="theme === 'dark' ? 'สลับเป็นโหมดสว่าง' : 'สลับเป็นโหมดมืด'"
+        @click="toggleTheme"
+      >
+        {{ theme === 'dark' ? '☀️' : '🌙' }}
+      </button>
       <span
         class="rounded-full bg-[var(--color-surface-muted)] px-2.5 py-1 text-xs font-medium text-[var(--color-text-muted)]"
       >

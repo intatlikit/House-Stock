@@ -29,6 +29,37 @@
   --radius-control: 0.75rem;
 }
 
+/*
+  Dark mode — โทนเดียวกับ light mode แต่กลับค่าความสว่าง ไม่ใช้ดำสนิท
+  (ใช้เขียวอมเทาเข้มแทน เพื่อลดความจ้าและถนอมสายตาตอนกลางคืน)
+  เปิดใช้งานโดยเติม class "dark" ที่ <html> — ดู src/composables/useTheme.ts
+*/
+.dark {
+  --color-bg: #1b1f1c;
+  --color-surface: #23281f;
+  --color-surface-muted: #2c322a;
+  --color-border: #3b423a;
+
+  --color-primary: #86b89b;
+  --color-primary-dark: #a9d0b7;
+  --color-primary-light: #2a3830;
+
+  --color-text: #e8ece7;
+  --color-text-muted: #a2ac9e;
+
+  --color-warning: #e0a468;
+  --color-warning-light: #3a3021;
+  --color-danger: #e08b81;
+  --color-danger-light: #3d2926;
+}
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
 html, body, #app {
   height: 100%;
 }
@@ -38,6 +69,7 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* horizontal-scroll tables: ตารางแสดงเต็มความกว้างจริง ให้ user scroll เอาเอง */
