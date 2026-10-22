@@ -16,8 +16,9 @@ const emit = defineEmits<{ close: [] }>()
       class="fixed inset-0 z-50 flex items-center justify-center bg-[#2E332F]/40 p-4"
       @click.self="emit('close')"
     >
+      <!-- max-h-full + overflow-y-auto: เนื้อหายาวกว่าจอ (เช่นมือถือตอนคีย์บอร์ดเด้ง) ให้ scroll ใน modal แทนการล้นจอ -->
       <div
-        class="w-full rounded-[var(--radius-card)] bg-[var(--color-surface)] p-6 shadow-xl"
+        class="max-h-full w-full overflow-y-auto rounded-[var(--radius-card)] bg-[var(--color-surface)] p-5 shadow-xl sm:p-6"
         :class="maxWidth"
       >
         <div v-if="title || $slots.header" class="mb-4 flex items-start justify-between gap-4">

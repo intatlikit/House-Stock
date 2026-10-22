@@ -29,6 +29,10 @@ const locationId = ref(props.item?.location_id ?? '')
 const newLocationName = ref('')
 const isSubmitting = ref(false)
 
+// text-base บนมือถือกัน iOS ซูมตอนแตะ input (iOS ซูมเมื่อฟอนต์ < 16px), min-w-0 กัน input ดันจนล้นคอลัมน์
+const fieldClass =
+  'block w-full min-w-0 rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-base sm:text-sm'
+const labelClass = 'mb-1 block text-xs font-medium text-[var(--color-text-muted)]'
 onMounted(() => {
   fetchTags()
   fetchLocations()
@@ -60,88 +64,61 @@ async function submit() {
   <BaseModal :title="isEditMode ? 'แก้ไขสิ่งของ' : 'เพิ่มสิ่งของ'" max-width="max-w-lg" @close="emit('close')">
     <form class="space-y-4" @submit.prevent="submit">
       <div>
-        <label class="mb-1 block text-xs font-medium text-[var(--color-text-muted)]">ชื่อสิ่งของ *</label>
-        <input
-          v-model="name"
-          type="text"
-          required
-          autofocus
-          class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-sm"
-        />
+        <label :class="labelClass">ชื่อสิ่งของ *</label>
+        <input v-model="name" type="text" required autofocus :class="fieldClass" />
       </div>
 
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="mb-1 block text-xs font-medium text-[var(--color-text-muted)]">ประเภท (tag)</label>
-          <select
-            v-model="tagId"
-            class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-sm"
-          >
+      <!-- มือถือเรียงลงมาทีละช่อง, จอใหญ่ขึ้นเลือก/พิมพ์ใหม่วางข้างกัน -->
+      <div>
+        <label :class="labelClass">ประเภท (tag)</label>
+        <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-3">
+          <select v-model="tagId" :class="fieldClass">
             <option value="">เลือก tag ที่มีอยู่...</option>
             <option v-for="tag in tags" :key="tag.id" :value="tag.id">{{ tag.name }}</option>
           </select>
-          <input
-            v-model="newTagName"
-            type="text"
-            placeholder="หรือพิมพ์ tag ใหม่"
-            class="mt-1.5 w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-sm"
-          />
-        </div>
-
-        <div>
-          <label class="mb-1 block text-xs font-medium text-[var(--color-text-muted)]">จำนวน *</label>
-          <input
-            v-model.number="quantity"
-            type="number"
-            min="0"
-            required
-            class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-sm"
-          />
+          <input v-model="newTagName" type="text" placeholder="หรือพิมพ์ tag ใหม่" :class="fieldClass" />
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="mb-1 block text-xs font-medium text-[var(--color-text-muted)]">วันหมดอายุ</label>
-          <input
-            v-model="expiryDate"
-            type="date"
-            class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-sm"
-          />
+      <!-- จำนวน + ราคาเป็นช่องตัวเลขแคบๆ วางคู่กันได้แม้บนมือถือ, วันหมดอายุเต็มแถวบนมือถือ -->
+      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div class="min-w-0">
+          <label :class="labelClass">จำนวน *</label>
+          <input v-model.number="quantity" type="number" min="0" required inputmode="decimal" :class="fieldClass" />
         </div>
-        <div>
-          <label class="mb-1 block text-xs font-medium text-[var(--color-text-muted)]">ราคา</label>
+        <div class="min-w-0">
+          <label :class="labelClass">ราคา</label>
           <input
             v-model.number="price"
             type="number"
             min="0"
             step="0.01"
-            class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-sm"
+            inputmode="decimal"
+            :class="fieldClass"
           />
+        </div>
+        <div class="col-span-2 min-w-0 sm:col-span-1">
+          <label :class="labelClass">วันหมดอายุ</label>
+          <!-- min-h กัน iOS ยุบ input date ตอนยังไม่มีค่า -->
+          <input v-model="expiryDate" type="date" :class="[fieldClass, 'min-h-[2.625rem] appearance-none']" />
         </div>
       </div>
 
       <div>
-        <label class="mb-1 block text-xs font-medium text-[var(--color-text-muted)]">สถานที่ที่ซื้อ</label>
-        <select
-          v-model="locationId"
-          class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-sm"
-        >
-          <option value="">เลือกสถานที่ที่เคยเพิ่ม...</option>
-          <option v-for="loc in locations" :key="loc.id" :value="loc.id">{{ loc.name }}</option>
-        </select>
-        <input
-          v-model="newLocationName"
-          type="text"
-          placeholder="หรือพิมพ์สถานที่ใหม่"
-          class="mt-1.5 w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-sm"
-        />
+        <label :class="labelClass">สถานที่ที่ซื้อ</label>
+        <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-3">
+          <select v-model="locationId" :class="fieldClass">
+            <option value="">เลือกสถานที่ที่เคยเพิ่ม...</option>
+            <option v-for="loc in locations" :key="loc.id" :value="loc.id">{{ loc.name }}</option>
+          </select>
+          <input v-model="newLocationName" type="text" placeholder="หรือพิมพ์สถานที่ใหม่" :class="fieldClass" />
+        </div>
       </div>
 
       <button
         type="submit"
         :disabled="!name.trim() || isSubmitting"
-        class="w-full rounded-[var(--radius-control)] bg-[var(--color-primary)] py-2 text-sm font-semibold text-white disabled:opacity-50"
+        class="w-full rounded-[var(--radius-control)] bg-[var(--color-primary)] py-2.5 text-sm font-semibold text-white disabled:opacity-50"
       >
         {{ isEditMode ? 'บันทึกการแก้ไข' : 'เพิ่มสิ่งของ' }}
       </button>
