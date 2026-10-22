@@ -4,6 +4,7 @@ import AppHeader from '@/components/AppHeader.vue'
 import HouseList from '@/components/HouseList.vue'
 import AddHouseModal from '@/components/AddHouseModal.vue'
 import FabButton from '@/components/FabButton.vue'
+import ScrollTopButton from '@/components/ScrollTopButton.vue'
 import GlobalSearchModal from '@/components/GlobalSearchModal.vue'
 import { useHouses } from '@/composables/useHouses'
 import { useGlobalSearch } from '@/composables/useGlobalSearch'
@@ -47,6 +48,7 @@ onMounted(fetchHouses)
       </section>
     </main>
 
+    <ScrollTopButton />
     <FabButton label="เพิ่มบ้าน" @click="showAddHouse = true" />
 
     <AddHouseModal v-if="showAddHouse" @close="showAddHouse = false" />

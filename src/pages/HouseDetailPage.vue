@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import FabButton from '@/components/FabButton.vue'
+import ScrollTopButton from '@/components/ScrollTopButton.vue'
 import ItemTable from '@/components/ItemTable.vue'
 import ItemFormModal from '@/components/ItemFormModal.vue'
 import ItemDetailModal from '@/components/ItemDetailModal.vue'
@@ -137,6 +138,7 @@ async function confirmDelete() {
       />
     </main>
 
+    <ScrollTopButton />
     <FabButton label="เพิ่มสิ่งของ" @click="showAddModal = true" />
 
     <ItemFormModal v-if="showAddModal" @close="showAddModal = false" @submit="handleAddSubmit" />
