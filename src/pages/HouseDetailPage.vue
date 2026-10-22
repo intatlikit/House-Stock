@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
+import FabButton from '@/components/FabButton.vue'
 import ItemTable from '@/components/ItemTable.vue'
 import ItemFormModal from '@/components/ItemFormModal.vue'
 import ItemDetailModal from '@/components/ItemDetailModal.vue'
@@ -72,18 +73,10 @@ async function confirmDelete() {
           ← <span class="font-semibold text-[var(--color-text)]">{{ house?.name ?? 'บ้าน' }}</span>
         </button>
       </template>
-      <template #actions>
-        <button
-          type="button"
-          class="rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white"
-          @click="showAddModal = true"
-        >
-          + เพิ่มสิ่งของ
-        </button>
-      </template>
     </AppHeader>
 
-    <main class="mx-auto max-w-5xl space-y-4 px-4 py-6 sm:px-6">
+    <!-- pb-24 กันไม่ให้ปุ่มลอยบังแถวล่างสุดของตาราง -->
+    <main class="mx-auto max-w-5xl space-y-4 px-4 pt-6 pb-24 sm:px-6">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div class="relative flex-1">
           <input
@@ -127,7 +120,9 @@ async function confirmDelete() {
       />
     </main>
 
-    <ItemFormModal v-if="showAddModal" @close="showAddModal = false" @submit="handleAddSubmit" />
+    <FabButton label="เพิ่มสิ่งของ" @click="showAddModal = true" />
+
+    <ItemFormModal v-if="showAddModal"@close="showAddModal = false" @submit="handleAddSubmit" />
 
     <ItemFormModal
       v-if="editingItem"

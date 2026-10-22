@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import AppHeader from '@/components/AppHeader.vue'
 import HouseList from '@/components/HouseList.vue'
 import AddHouseModal from '@/components/AddHouseModal.vue'
+import FabButton from '@/components/FabButton.vue'
 import GlobalSearchModal from '@/components/GlobalSearchModal.vue'
 import { useHouses } from '@/composables/useHouses'
 import { useGlobalSearch } from '@/composables/useGlobalSearch'
@@ -17,19 +18,10 @@ onMounted(fetchHouses)
 
 <template>
   <div class="min-h-full">
-    <AppHeader>
-      <template #actions>
-        <button
-          type="button"
-          class="rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white"
-          @click="showAddHouse = true"
-        >
-          + เพิ่มบ้าน
-        </button>
-      </template>
-    </AppHeader>
+    <AppHeader />
 
-    <main class="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
+    <!-- pb-24 กันไม่ให้ปุ่มลอยบังเนื้อหาด้านล่างสุด -->
+    <main class="mx-auto max-w-5xl space-y-6 px-4 pt-6 pb-24 sm:px-6">
       <!-- ช่องค้นหาสิ่งของจากบ้านทั้งหมด -->
       <button
         type="button"
@@ -54,6 +46,8 @@ onMounted(fetchHouses)
         <!-- <FutureWidget /> -->
       </section>
     </main>
+
+    <FabButton label="เพิ่มบ้าน" @click="showAddHouse = true" />
 
     <AddHouseModal v-if="showAddHouse" @close="showAddHouse = false" />
     <GlobalSearchModal v-if="isSearchOpen" @close="closeSearch" />
