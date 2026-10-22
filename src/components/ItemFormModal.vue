@@ -42,7 +42,8 @@ async function submit() {
       name: name.value.trim(),
       tag_id: tagId.value || null,
       new_tag_name: newTagName.value.trim() || null,
-      quantity: Number(quantity.value) || 1,
+      // ใช้ ?? แทน || เพื่อให้บันทึกจำนวน 0 ได้ (ของหมดแล้วแต่ยังอยากเก็บรายการไว้)
+      quantity: Number(quantity.value ?? 1),
       expiry_date: expiryDate.value || null,
       price: price.value === null || price.value === undefined ? null : Number(price.value),
       location_id: locationId.value || null,
