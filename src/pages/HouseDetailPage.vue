@@ -37,6 +37,17 @@ onMounted(async () => {
   await Promise.all([fetchItems(), fetchTags()])
 })
 
+// tag ถือว่า "ถูกเลือก" เมื่อคำค้นตรงกับชื่อ tag (ไม่สนตัวพิมพ์เล็ก/ใหญ่) — ครอบคลุมทั้งกดเลือกและพิมพ์เอง
+function isTagActive(tagName: string) {
+  return searchQuery.value.trim().toLowerCase() === tagName.toLowerCase()
+}
+
+// กด tag ครั้งแรก = filter ด้วย tag นั้น, กดซ้ำ = ยกเลิกและล้างคำค้น
+function toggleTag(tagName: string) {
+  if (isTagActive(tagName)) clearSearch()
+  else searchQuery.value = tagName
+}
+
 // popup states
 const showAddModal = ref(false)
 const editingItem = ref<ItemWithRelations | null>(null)
@@ -97,14 +108,20 @@ async function confirmDelete() {
         </div>
       </div>
 
-      <!-- tag แนะนำ กดเพื่อค้นหาด้วย tag นั้นทันที -->
+      <!-- tag แนะนำ กดเพื่อ filter ด้วย tag นั้น กดซ้ำเพื่อยกเลิก -->
       <div v-if="tags.length" class="flex flex-wrap gap-2">
         <button
           v-for="tag in tags"
           :key="tag.id"
           type="button"
-          class="rounded-full border border-[var(--color-border)] px-2.5 py-1 text-xs text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-          @click="searchQuery = tag.name"
+          class="rounded-full border px-2.5 py-1 text-xs transition"
+          :class="
+            isTagActive(tag.name)
+              ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] font-medium text-[var(--color-primary-dark)]'
+              : 'border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]'
+          "
+          :aria-pressed="isTagActive(tag.name)"
+          @click="toggleTag(tag.name)"
         >
           {{ tag.name }}
         </button>
