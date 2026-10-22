@@ -1,40 +1,11 @@
 @import "tailwindcss";
 
 /*
-  House Stock — design tokens
-  ถนอมสายตา: พื้นหลังขาวอมเขียวอ่อน ไม่ใช้ขาวจ๊ด, primary เขียวเสจนุ่มๆ,
+  House Stock — design tokens (dark mode อย่างเดียว)
+  ถนอมสายตา: ใช้เขียวอมเทาเข้มแทนดำสนิท เพื่อลดความจ้า, primary เขียวเสจนุ่มๆ,
   โทนเตือน/หมดอายุ แยกชัดแต่ไม่จัดจ้านเกินไป
 */
 @theme {
-  --color-bg: #f7f8f5;
-  --color-surface: #ffffff;
-  --color-surface-muted: #eef1ec;
-  --color-border: #dde3d9;
-
-  --color-primary: #5b8a72;
-  --color-primary-dark: #46705a;
-  --color-primary-light: #e7efe9;
-
-  --color-text: #2e332f;
-  --color-text-muted: #6b756e;
-
-  --color-warning: #d98e4a;
-  --color-warning-light: #faeee1;
-  --color-danger: #c1594f;
-  --color-danger-light: #f8e7e5;
-
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-
-  --radius-card: 1rem;
-  --radius-control: 0.75rem;
-}
-
-/*
-  Dark mode — โทนเดียวกับ light mode แต่กลับค่าความสว่าง ไม่ใช้ดำสนิท
-  (ใช้เขียวอมเทาเข้มแทน เพื่อลดความจ้าและถนอมสายตาตอนกลางคืน)
-  เปิดใช้งานโดยเติม class "dark" ที่ <html> — ดู src/composables/useTheme.ts
-*/
-.dark {
   --color-bg: #1b1f1c;
   --color-surface: #23281f;
   --color-surface-muted: #2c322a;
@@ -51,12 +22,14 @@
   --color-warning-light: #3a3021;
   --color-danger: #e08b81;
   --color-danger-light: #3d2926;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 1rem;
+  --radius-control: 0.75rem;
 }
 
 html {
-  color-scheme: light;
-}
-html.dark {
   color-scheme: dark;
 }
 

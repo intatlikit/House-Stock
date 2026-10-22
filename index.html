@@ -10,17 +10,8 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <meta name="color-scheme" content="dark" />
     <title>House Stock — จัดการของใช้ในบ้าน</title>
-    <script>
-      // ตั้ง class "dark" ก่อน Vue mount เพื่อกันเว็บกระพริบสีผิดตอนโหลดหน้า (FOUC)
-      (function () {
-        try {
-          var stored = localStorage.getItem('house-stock-theme')
-          var isDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
-          if (isDark) document.documentElement.classList.add('dark')
-        } catch (e) {}
-      })()
-    </script>
   </head>
   <body>
     <div id="app"></div>
