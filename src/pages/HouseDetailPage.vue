@@ -139,7 +139,7 @@ async function confirmDelete() {
 
     <FabButton label="เพิ่มสิ่งของ" @click="showAddModal = true" />
 
-    <ItemFormModal v-if="showAddModal"@close="showAddModal = false" @submit="handleAddSubmit" />
+    <ItemFormModal v-if="showAddModal" @close="showAddModal = false" @submit="handleAddSubmit" />
 
     <ItemFormModal
       v-if="editingItem"
