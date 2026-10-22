@@ -27,14 +27,18 @@ async function fetchItemsForHouse(houseId: string) {
   isLoading.value = false
 }
 
-/** ค่าเริ่มต้น: เรียงตามวันหมดอายุใกล้สุดก่อน, ถ้าไม่มีวันหมดอายุให้ต่อท้ายด้วยวันที่เพิ่มเข้ามาเก่าสุดก่อน */
+/**
+ * ค่าเริ่มต้น: เรียงตามวันหมดอายุใกล้สุดก่อน (ที่ไม่มีวันหมดอายุต่อท้าย)
+ * → ถ้าวันหมดอายุเท่ากันให้จำนวนน้อยสุดขึ้นก่อน → สุดท้ายเรียงตามวันที่เพิ่มเข้ามาเก่าสุดก่อน
+ */
 function defaultSortItems(items: ItemWithRelations[]): ItemWithRelations[] {
   return [...items].sort((a, b) => {
-    if (a.expiry_date && b.expiry_date) {
-      return a.expiry_date.localeCompare(b.expiry_date)
-    }
     if (a.expiry_date && !b.expiry_date) return -1
     if (!a.expiry_date && b.expiry_date) return 1
+    if (a.expiry_date && b.expiry_date && a.expiry_date !== b.expiry_date) {
+      return a.expiry_date.localeCompare(b.expiry_date)
+    }
+    if (a.quantity !== b.quantity) return a.quantity - b.quantity
     return a.created_at.localeCompare(b.created_at)
   })
 }
