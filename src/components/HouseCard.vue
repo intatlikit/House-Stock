@@ -54,10 +54,13 @@ async function confirmDelete() {
     class="group flex cursor-pointer items-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm transition hover:shadow-md"
     @click="openHouse"
   >
+    <!-- handle สำหรับลากจัดลำดับ (logic อยู่ที่ HouseList): touch-none กันเบราว์เซอร์มือถือ scroll แทนการลาก -->
     <span
-      class="cursor-grab select-none text-[var(--color-text-muted)] opacity-60 group-hover:opacity-100"
+      data-drag-handle
+      class="-m-2 cursor-grab touch-none select-none p-2 text-lg leading-none text-[var(--color-text-muted)] opacity-60 group-hover:opacity-100 active:cursor-grabbing"
       title="ลากเพื่อจัดลำดับ"
       aria-hidden="true"
+      @click.stop
     >
       ⠿
     </span>
