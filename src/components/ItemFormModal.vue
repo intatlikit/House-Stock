@@ -82,6 +82,9 @@ const overwriteItemId = computed(() => {
   return mode.value === 'existing' && source && source.house_id === props.houseId ? source.id : null
 })
 
+// ของเดิมในบ้านนี้: ช่องจำนวนคือจำนวนที่ซื้อเพิ่ม แล้วบวกเข้ากับจำนวนเดิมตอนบันทึก
+const baseQuantity = computed(() => (overwriteItemId.value ? (sourceItem.value?.quantity ?? 0) : 0))
+
 const sourceHouseName = computed(
   () => existingGroups.value.find((g) => g.house.id === sourceItem.value?.house_id)?.house.name ?? '',
 )
@@ -118,6 +121,8 @@ function setMode(next: AddMode) {
 function pickItem(source: ItemWithRelations) {
   sourceItem.value = source
   fillForm(source)
+  // ของบ้านนี้จะบวกจำนวนเพิ่ม — เริ่มที่ซื้อเพิ่ม 1 ชิ้นแทนการยกจำนวนเดิมมาทั้งหมด
+  if (source.house_id === props.houseId) quantity.value = 1
   isPickerOpen.value = false
   pickerQuery.value = ''
 }
@@ -144,7 +149,7 @@ async function submit() {
       tag_id: tagId.value || null,
       new_tag_name: newTagName.value.trim() || null,
       // ใช้ ?? แทน || เพื่อให้บันทึกจำนวน 0 ได้ (ของหมดแล้วแต่ยังอยากเก็บรายการไว้)
-      quantity: Number(quantity.value ?? 1),
+      quantity: baseQuantity.value + Number(quantity.value ?? 1),
       expiry_date: expiryDate.value || null,
       price: price.value === null || price.value === undefined ? null : Number(price.value),
       location_id: locationId.value || null,
@@ -267,7 +272,7 @@ async function submit() {
           v-if="sourceItem && overwriteItemId"
           class="mt-2 rounded-[var(--radius-control)] bg-[var(--color-warning-light)] px-3 py-2 text-xs text-[var(--color-warning)]"
         >
-          บันทึกแล้วจะทับข้อมูลเดิมของ "{{ sourceItem.name }}" ในบ้านนี้ทั้งหมด
+          บันทึกแล้วจะบวกจำนวนที่กรอกเข้ากับ "{{ sourceItem.name }}" ในบ้านนี้ และทับข้อมูลช่องอื่นด้วยค่าในฟอร์ม
         </p>
         <p
           v-else-if="sourceItem"
@@ -299,8 +304,11 @@ async function submit() {
         <!-- จำนวน + ราคาเป็นช่องตัวเลขแคบๆ วางคู่กันได้แม้บนมือถือ, วันหมดอายุเต็มแถวบนมือถือ -->
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div class="min-w-0">
-            <label :class="labelClass">จำนวน *</label>
+            <label :class="labelClass">{{ overwriteItemId ? 'จำนวนที่เพิ่ม *' : 'จำนวน *' }}</label>
             <input v-model.number="quantity" type="number" min="0" required inputmode="decimal" :class="fieldClass" />
+            <p v-if="overwriteItemId" class="mt-1 text-xs text-[var(--color-text-muted)]">
+              เดิม {{ baseQuantity }} → รวม {{ baseQuantity + Number(quantity ?? 0) }}
+            </p>
           </div>
           <div class="min-w-0">
             <label :class="labelClass">ราคา</label>
@@ -337,7 +345,7 @@ async function submit() {
         :disabled="!canSubmit"
         class="w-full rounded-[var(--radius-control)] bg-[var(--color-primary)] py-2.5 text-sm font-semibold text-white disabled:opacity-50"
       >
-        {{ isEditMode ? 'บันทึกการแก้ไข' : overwriteItemId ? 'บันทึกทับรายการเดิม' : 'เพิ่มสิ่งของ' }}
+        {{ isEditMode ? 'บันทึกการแก้ไข' : overwriteItemId ? 'เพิ่มเข้ารายการเดิม' : 'เพิ่มสิ่งของ' }}
       </button>
     </form>
   </BaseModal>

@@ -57,6 +57,7 @@ const viewingItem = ref<ItemWithRelations | null>(null)
 const deletingItem = ref<ItemWithRelations | null>(null)
 
 // overwriteItemId มีค่าเมื่อเลือก "ใช้ของเดิม" จากบ้านนี้ -> บันทึกทับ record เดิมแทนการเพิ่มใหม่
+// (payload.quantity ถูกบวกจำนวนเดิมมาให้แล้วจากฟอร์ม)
 async function handleAddSubmit(payload: ItemFormPayload, overwriteItemId: string | null) {
   if (overwriteItemId) await updateItem(overwriteItemId, payload)
   else await addItem(payload)
