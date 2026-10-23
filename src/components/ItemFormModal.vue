@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import BaseModal from '@/components/BaseModal.vue'
 import { useTags } from '@/composables/useTags'
 import { useLocations } from '@/composables/useLocations'
+import { useHouses } from '@/composables/useHouses'
 import { fetchAllItemsGroupedByHouse } from '@/composables/useItems'
 import type { GlobalSearchResultGroup, ItemFormPayload, ItemWithRelations } from '@/types'
 
@@ -21,6 +22,7 @@ const emit = defineEmits<{
 
 const { tags, fetchTags } = useTags()
 const { locations, fetchLocations } = useLocations()
+const { houses } = useHouses()
 
 const isEditMode = Boolean(props.item)
 
@@ -53,27 +55,23 @@ const mode = ref<AddMode>('new')
 const existingGroups = ref<GlobalSearchResultGroup[]>([])
 const isLoadingExisting = ref(false)
 const existingError = ref<string | null>(null)
-const isPickerOpen = ref(false)
+// บ้านที่กำลังดูรายการของเดิมอยู่ เริ่มที่บ้านที่เปิดอยู่
+const pickerHouseId = ref(props.houseId ?? '')
 const pickerQuery = ref('')
 const sourceItem = ref<ItemWithRelations | null>(null)
 
 // บ้านที่เปิดอยู่ขึ้นก่อน ที่เหลือคงลำดับบ้านเดิม
-const filteredGroups = computed(() => {
+const pickerHouses = computed(() =>
+  [...houses.value].sort((a, b) => Number(b.id === props.houseId) - Number(a.id === props.houseId)),
+)
+
+// สิ่งของของบ้านที่เลือก กรองด้วยชื่อหรือ tag
+const pickerItems = computed(() => {
+  const items = existingGroups.value.find((g) => g.house.id === pickerHouseId.value)?.items ?? []
   const q = pickerQuery.value.trim().toLowerCase()
-  const groups = q
-    ? existingGroups.value
-        .map((group) => ({
-          ...group,
-          items: group.items.filter(
-            (item) =>
-              item.name.toLowerCase().includes(q) ||
-              (item.tag?.name ?? '').toLowerCase().includes(q),
-          ),
-        }))
-        .filter((group) => group.items.length)
-    : existingGroups.value
-  return [...groups].sort(
-    (a, b) => Number(b.house.id === props.houseId) - Number(a.house.id === props.houseId),
+  if (!q) return items
+  return items.filter(
+    (item) => item.name.toLowerCase().includes(q) || (item.tag?.name ?? '').toLowerCase().includes(q),
   )
 })
 
@@ -87,7 +85,7 @@ const overwriteItemId = computed(() => {
 const baseQuantity = computed(() => (overwriteItemId.value ? (sourceItem.value?.quantity ?? 0) : 0))
 
 const sourceHouseName = computed(
-  () => existingGroups.value.find((g) => g.house.id === sourceItem.value?.house_id)?.house.name ?? '',
+  () => houses.value.find((h) => h.id === sourceItem.value?.house_id)?.name ?? '',
 )
 
 const canSubmit = computed(
@@ -110,7 +108,6 @@ function setMode(next: AddMode) {
   if (mode.value === next) return
   mode.value = next
   if (next === 'existing') {
-    isPickerOpen.value = true
     if (!existingGroups.value.length && !isLoadingExisting.value) loadExistingItems()
   } else if (sourceItem.value) {
     // ค่าในฟอร์มยืมมาจากของเดิม — กลับมาเพิ่มของใหม่ให้เริ่มจากฟอร์มว่าง
@@ -124,7 +121,10 @@ function pickItem(source: ItemWithRelations) {
   fillForm(source)
   // ของบ้านนี้จะบวกจำนวนเพิ่ม — เริ่มที่ซื้อเพิ่ม 1 ชิ้นแทนการยกจำนวนเดิมมาทั้งหมด
   if (source.house_id === props.houseId) quantity.value = 1
-  isPickerOpen.value = false
+}
+
+function selectPickerHouse(houseId: string) {
+  pickerHouseId.value = houseId
   pickerQuery.value = ''
 }
 
@@ -194,29 +194,27 @@ async function submit() {
       </div>
 
       <div v-if="mode === 'existing'">
-        <label :class="labelClass">สิ่งของที่มีอยู่แล้ว</label>
-        <button
-          type="button"
-          class="flex w-full items-center gap-2 rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-left text-sm"
-          :aria-expanded="isPickerOpen"
-          @click="isPickerOpen = !isPickerOpen"
-        >
-          <template v-if="sourceItem">
-            <span
-              class="min-w-0 truncate rounded-full bg-[var(--color-primary-light)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-primary-dark)]"
-            >
-              {{ sourceItem.name }}
-            </span>
-            <span class="shrink-0 text-xs text-[var(--color-text-muted)]">{{ sourceHouseName }}</span>
-          </template>
-          <span v-else class="text-[var(--color-text-muted)]">กดเพื่อเลือกสิ่งของ...</span>
-          <span class="ml-auto shrink-0 text-xs text-[var(--color-text-muted)]">{{ isPickerOpen ? '▲' : '▼' }}</span>
-        </button>
+        <label :class="labelClass">เลือกบ้าน</label>
+        <!-- ปุ่มเลือกบ้าน แล้วแสดงช่องค้นหา + สิ่งของของบ้านนั้นข้างล่าง -->
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="h in pickerHouses"
+            :key="h.id"
+            type="button"
+            class="rounded-full border px-3 py-1 text-xs transition"
+            :class="
+              pickerHouseId === h.id
+                ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] font-medium text-[var(--color-primary-dark)]'
+                : 'border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]'
+            "
+            :aria-pressed="pickerHouseId === h.id"
+            @click="selectPickerHouse(h.id)"
+          >
+            {{ h.name }}<span v-if="h.id === houseId"> (บ้านนี้)</span>
+          </button>
+        </div>
 
-        <div
-          v-if="isPickerOpen"
-          class="mt-1.5 rounded-[var(--radius-control)] border border-[var(--color-border)] p-2"
-        >
+        <div class="mt-2 rounded-[var(--radius-control)] border border-[var(--color-border)] p-2">
           <input
             v-model="pickerQuery"
             type="text"
@@ -224,47 +222,41 @@ async function submit() {
             :class="fieldClass"
             @keydown.enter.prevent
           />
-          <div class="mt-2 max-h-60 space-y-3 overflow-y-auto">
+          <div class="mt-2 max-h-60 overflow-y-auto">
             <p v-if="isLoadingExisting" class="px-1 text-sm text-[var(--color-text-muted)]">กำลังโหลด...</p>
             <p v-else-if="existingError" class="px-1 text-sm text-[var(--color-danger)]">
               โหลดรายการไม่สำเร็จ: {{ existingError }}
             </p>
-            <p v-else-if="!filteredGroups.length" class="px-1 text-sm text-[var(--color-text-muted)]">
-              {{ pickerQuery.trim() ? `ไม่พบสิ่งของที่ตรงกับ "${pickerQuery}"` : 'ยังไม่มีสิ่งของในบ้านไหนเลย' }}
+            <p v-else-if="!pickerItems.length" class="px-1 text-sm text-[var(--color-text-muted)]">
+              {{ pickerQuery.trim() ? `ไม่พบสิ่งของที่ตรงกับ "${pickerQuery}"` : 'ยังไม่มีสิ่งของในบ้านนี้' }}
             </p>
 
-            <div v-for="group in filteredGroups" :key="group.house.id">
-              <p class="mb-1 px-1 text-xs font-semibold tracking-wide text-[var(--color-text-muted)]">
-                {{ group.house.name }}
-                <span v-if="group.house.id === houseId" class="font-normal">(บ้านนี้)</span>
-              </p>
-              <ul class="space-y-1">
-                <li v-for="existing in group.items" :key="existing.id">
-                  <button
-                    type="button"
-                    class="flex w-full items-center justify-between gap-2 rounded-[var(--radius-control)] border px-3 py-2 text-left text-sm transition"
-                    :class="
-                      sourceItem?.id === existing.id
-                        ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)]'
-                        : 'border-transparent bg-[var(--color-surface-muted)] hover:border-[var(--color-primary)]'
-                    "
-                    @click="pickItem(existing)"
-                  >
-                    <span class="min-w-0 truncate font-medium text-[var(--color-text)]">{{ existing.name }}</span>
-                    <span class="flex shrink-0 items-center gap-2 text-xs text-[var(--color-text-muted)]">
-                      <span
-                        v-if="existing.tag"
-                        class="rounded-full bg-[var(--color-primary-light)] px-2 py-0.5 text-[var(--color-primary-dark)]"
-                      >
-                        {{ existing.tag.name }}
-                      </span>
-                      <span>×{{ existing.quantity }}</span>
-                      <span v-if="existing.expiry_date">{{ formatDate(existing.expiry_date) }}</span>
+            <ul v-else class="space-y-1">
+              <li v-for="existing in pickerItems" :key="existing.id">
+                <button
+                  type="button"
+                  class="flex w-full items-center justify-between gap-2 rounded-[var(--radius-control)] border px-3 py-2 text-left text-sm transition"
+                  :class="
+                    sourceItem?.id === existing.id
+                      ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)]'
+                      : 'border-transparent bg-[var(--color-surface-muted)] hover:border-[var(--color-primary)]'
+                  "
+                  @click="pickItem(existing)"
+                >
+                  <span class="min-w-0 truncate font-medium text-[var(--color-text)]">{{ existing.name }}</span>
+                  <span class="flex shrink-0 items-center gap-2 text-xs text-[var(--color-text-muted)]">
+                    <span
+                      v-if="existing.tag"
+                      class="rounded-full bg-[var(--color-primary-light)] px-2 py-0.5 text-[var(--color-primary-dark)]"
+                    >
+                      {{ existing.tag.name }}
                     </span>
-                  </button>
-                </li>
-              </ul>
-            </div>
+                    <span>×{{ existing.quantity }}</span>
+                    <span v-if="existing.expiry_date">{{ formatDate(existing.expiry_date) }}</span>
+                  </span>
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
 
