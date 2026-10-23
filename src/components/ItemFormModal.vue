@@ -123,9 +123,13 @@ function pickItem(source: ItemWithRelations) {
   if (source.house_id === props.houseId) quantity.value = 1
 }
 
+// เปลี่ยนบ้าน = เริ่มเลือกใหม่หมด: ล้างสิ่งของที่เลือกไว้และค่าในฟอร์มที่ยืมมา
 function selectPickerHouse(houseId: string) {
+  if (pickerHouseId.value === houseId) return
   pickerHouseId.value = houseId
   pickerQuery.value = ''
+  sourceItem.value = null
+  fillForm(null)
 }
 
 // text-base บนมือถือกัน iOS ซูมตอนแตะ input (iOS ซูมเมื่อฟอนต์ < 16px), min-w-0 กัน input ดันจนล้นคอลัมน์
