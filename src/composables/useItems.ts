@@ -165,6 +165,29 @@ function useItemsForHouse(houseId: string) {
     return data
   }
 
+  // อัปเดต state ก่อนเพื่อให้กด +/- ได้ลื่น แล้วค่อยเขียน DB — ถ้าพลาดให้คืนค่าเดิม
+  async function updateQuantity(itemId: string, quantity: number) {
+    const previous = rawItems.value.find((item) => item.id === itemId)?.quantity
+    const setQuantity = (value: number) => {
+      itemsByHouse.value[houseId] = rawItems.value.map((item) =>
+        item.id === itemId ? { ...item, quantity: value } : item,
+      )
+    }
+    setQuantity(quantity)
+
+    const { error: err } = await supabase
+      .from('items')
+      .update({ quantity, updated_at: new Date().toISOString() })
+      .eq('id', itemId)
+
+    if (err) {
+      // คืนค่าเฉพาะกรณียังไม่มีการกดเปลี่ยนซ้อนเข้ามาหลังจากนี้
+      const current = rawItems.value.find((item) => item.id === itemId)?.quantity
+      if (previous !== undefined && current === quantity) setQuantity(previous)
+      throw err
+    }
+  }
+
   async function deleteItem(itemId: string) {
     const { error: err } = await supabase.from('items').delete().eq('id', itemId)
     if (err) throw err
@@ -182,6 +205,7 @@ function useItemsForHouse(houseId: string) {
     fetchItems: () => fetchItemsForHouse(houseId),
     addItem,
     updateItem,
+    updateQuantity,
     deleteItem,
   }
 }

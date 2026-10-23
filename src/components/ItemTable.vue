@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ItemWithRelations, SortState, SortColumn } from '@/types'
+import QuantityStepper from '@/components/QuantityStepper.vue'
 
 const props = defineProps<{
   items: ItemWithRelations[]
@@ -11,6 +12,7 @@ const emit = defineEmits<{
   view: [item: ItemWithRelations]
   edit: [item: ItemWithRelations]
   delete: [item: ItemWithRelations]
+  'update-quantity': [item: ItemWithRelations, quantity: number]
 }>()
 
 const columns: { key: SortColumn; label: string }[] = [
@@ -77,7 +79,10 @@ function formatDate(dateStr: string | null) {
             </span>
             <span v-else class="text-[var(--color-text-muted)]">—</span>
           </td>
-          <td class="whitespace-nowrap px-4 py-3">{{ item.quantity }}</td>
+          <!-- แก้จำนวนได้ตรงนี้เลย — กันไม่ให้คลิกทะลุไปเปิด popup รายละเอียด -->
+          <td class="whitespace-nowrap px-4 py-2" @click.stop>
+            <QuantityStepper :quantity="item.quantity" @change="(qty) => emit('update-quantity', item, qty)" />
+          </td>
           <td class="whitespace-nowrap px-4 py-3">
             <span
               :class="{

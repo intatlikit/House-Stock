@@ -31,6 +31,7 @@ const {
   addItem,
   updateItem,
   deleteItem,
+  updateQuantity,
 } = useItemsForHouse(props.id)
 
 onMounted(async () => {
@@ -135,6 +136,7 @@ async function confirmDelete() {
         @view="(item) => (viewingItem = item)"
         @edit="(item) => (editingItem = item)"
         @delete="(item) => (deletingItem = item)"
+        @update-quantity="(item, qty) => updateQuantity(item.id, qty)"
       />
     </main>
 
