@@ -57,7 +57,7 @@ async function fetchAllItemsGroupedByHouse(): Promise<GlobalSearchResultGroup[]>
 
 /**
  * ค่าเริ่มต้น: เรียงตามวันหมดอายุใกล้สุดก่อน (ที่ไม่มีวันหมดอายุต่อท้าย)
- * → ถ้าวันหมดอายุเท่ากันให้จำนวนน้อยสุดขึ้นก่อน → สุดท้ายเรียงตามวันที่เพิ่มเข้ามาเก่าสุดก่อน
+ * → ถ้าวันหมดอายุเท่ากันเรียงตามชื่อ ก-ฮ / A-Z → ชื่อซ้ำกันเรียงตามวันที่เพิ่มเข้ามาเก่าสุดก่อน
  */
 function defaultSortItems(items: ItemWithRelations[]): ItemWithRelations[] {
   return [...items].sort((a, b) => {
@@ -66,7 +66,8 @@ function defaultSortItems(items: ItemWithRelations[]): ItemWithRelations[] {
     if (a.expiry_date && b.expiry_date && a.expiry_date !== b.expiry_date) {
       return a.expiry_date.localeCompare(b.expiry_date)
     }
-    if (a.quantity !== b.quantity) return a.quantity - b.quantity
+    const byName = a.name.localeCompare(b.name, 'th')
+    if (byName !== 0) return byName
     return a.created_at.localeCompare(b.created_at)
   })
 }

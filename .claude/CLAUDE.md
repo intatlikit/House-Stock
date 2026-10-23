@@ -20,7 +20,7 @@ npm run preview   # preview production build
   - action ที่เขียน DB: เรียก Supabase ก่อน, `throw` error ถ้าพลาด, แล้วค่อยอัปเดต state ใน memory (ยกเว้น `reorderHouses` ที่อัปเดต state ก่อนเพื่อให้ UI ลื่น)
   - action ที่โหลดข้อมูล: เซ็ต `isLoading` / `error` แทนการ throw
 - `useItems` เก็บ item ของทุกบ้านใน `itemsByHouse` (key = `house_id`) และ join `tag` / `location` ด้วย `SELECT_WITH_RELATIONS`
-- Default sort ของ item: วันหมดอายุใกล้สุดก่อน (ที่ไม่มีวันหมดอายุต่อท้าย) → วันหมดอายุเท่ากันให้จำนวนน้อยสุดก่อน → สุดท้ายตาม `created_at` เก่าสุดก่อน (`defaultSortItems` ใน `useItems.ts`)
+- Default sort ของ item: วันหมดอายุใกล้สุดก่อน (ที่ไม่มีวันหมดอายุต่อท้าย) → วันหมดอายุเท่ากันเรียงตามชื่อ (ก-ฮ / A-Z) → ชื่อซ้ำกันตาม `created_at` เก่าสุดก่อน (`defaultSortItems` ใน `useItems.ts`)
 - Router ใช้ **hash history** (`/#/house/:id`) เพราะ GitHub Pages ไม่รองรับ SPA rewrite — อย่าเปลี่ยนเป็น `createWebHistory`
 - `vite.config.ts` ตั้ง `base: '/House-Stock/'` ตอน build — ถ้าเปลี่ยนชื่อ repo ต้องแก้ตรงนี้ด้วย
 - Alias `@` → `src/`
