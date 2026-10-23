@@ -1,6 +1,12 @@
 import { ref, computed } from 'vue'
 import { supabase } from '@/lib/supabase'
-import type { ItemFormPayload, ItemWithRelations, SortState } from '@/types'
+import type {
+  GlobalSearchResultGroup,
+  House,
+  ItemFormPayload,
+  ItemWithRelations,
+  SortState,
+} from '@/types'
 import { useTags } from '@/composables/useTags'
 import { useLocations } from '@/composables/useLocations'
 
@@ -25,6 +31,28 @@ async function fetchItemsForHouse(houseId: string) {
     itemsByHouse.value[houseId] = (data ?? []) as unknown as ItemWithRelations[]
   }
   isLoading.value = false
+}
+
+/**
+ * ดึง item ของทุกบ้านจัดกลุ่มตามบ้าน (เรียงตามลำดับบ้าน) ให้ฟอร์มเพิ่มสิ่งของเลือกใช้ข้อมูลของเดิม
+ * ไม่เก็บลง itemsByHouse เพราะใช้แค่ชั่วคราวตอนเปิดฟอร์ม
+ */
+async function fetchAllItemsGroupedByHouse(): Promise<GlobalSearchResultGroup[]> {
+  const { data, error: err } = await supabase
+    .from('items')
+    .select(`${SELECT_WITH_RELATIONS}, house:houses(*)`)
+    .order('name', { ascending: true })
+
+  if (err) throw err
+
+  const grouped = new Map<string, GlobalSearchResultGroup>()
+  for (const row of (data ?? []) as unknown as (ItemWithRelations & { house: House })[]) {
+    if (!grouped.has(row.house.id)) {
+      grouped.set(row.house.id, { house: row.house, items: [] })
+    }
+    grouped.get(row.house.id)!.items.push(row)
+  }
+  return Array.from(grouped.values()).sort((a, b) => a.house.sort_order - b.house.sort_order)
 }
 
 /**
@@ -210,4 +238,4 @@ function useItemsForHouse(houseId: string) {
   }
 }
 
-export { useItemsForHouse, fetchItemsForHouse }
+export { useItemsForHouse, fetchItemsForHouse, fetchAllItemsGroupedByHouse }
