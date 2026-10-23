@@ -23,8 +23,8 @@ const route = useRoute()
 
     <div class="flex items-center gap-3">
       <slot name="actions" />
-      <!-- ปุ่มเปิดหน้าตั้งค่า แสดงทุกหน้ายกเว้นหน้าตั้งค่าเอง -->
-      <SettingsButton v-if="route.name !== 'settings'" />
+      <!-- ปุ่มเปิดหน้าตั้งค่า แสดงทุกหน้ายกเว้นหน้าตั้งค่าและหน้าย่อยของตั้งค่า -->
+      <SettingsButton v-if="!String(route.name).startsWith('settings')" />
     </div>
   </header>
 </template>

@@ -25,6 +25,10 @@ function goBack() {
 
     <!-- เพิ่มเมนูใหม่: เพิ่ม SettingsSection / SettingsRow ในนี้ -->
     <main class="mx-auto max-w-2xl space-y-6 px-4 pt-6 pb-24 sm:px-6">
+      <SettingsSection title="ข้อมูล">
+        <SettingsRow label="แก้ไข tag" clickable @click="router.push({ name: 'settings-tags' })" />
+      </SettingsSection>
+
       <SettingsSection title="เกี่ยวกับ">
         <SettingsRow label="เวอร์ชัน" :value="`v${APP_VERSION}`" />
       </SettingsSection>

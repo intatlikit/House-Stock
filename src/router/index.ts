@@ -22,6 +22,11 @@ const router = createRouter({
       name: 'settings',
       component: () => import('@/pages/SettingsPage.vue'),
     },
+    {
+      path: '/settings/tags',
+      name: 'settings-tags',
+      component: () => import('@/pages/TagSettingsPage.vue'),
+    },
   ],
 })
 

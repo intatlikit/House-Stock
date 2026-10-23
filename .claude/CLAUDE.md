@@ -31,7 +31,7 @@ npm run preview   # preview production build
 
 ```
 src/
-  pages/        LandingPage (รายการบ้าน), HouseDetailPage (stock ของบ้าน), SettingsPage (ตั้งค่าเว็บ — เพิ่มเมนูด้วย `SettingsSection` + `SettingsRow`)
+  pages/        LandingPage (รายการบ้าน), HouseDetailPage (stock ของบ้าน), SettingsPage (ตั้งค่าเว็บ — เพิ่มเมนูด้วย `SettingsSection` + `SettingsRow`, เมนูที่เปิดหน้าย่อยใช้ `clickable`), TagSettingsPage (เพิ่ม/ค้นหา/แก้ชื่อ/ลบ tag — route `settings-tags`)
   components/   UI ย่อย, modal ทุกตัวครอบด้วย BaseModal (Teleport ไป body)
   composables/  useHouses, useItems, useTags, useLocations, useGlobalSearch
   lib/          supabase client, APP_VERSION (อ่านจาก package.json)
@@ -51,7 +51,7 @@ supabase/schema.sql   schema + RLS สำหรับรันใน Supabase SQ
 - Vue SFC ใช้ `<script setup lang="ts">`, `defineProps` / `defineEmits` แบบ type-based
 - **กฎ: แยก UI เป็น component เสมอเมื่อทำได้** — ให้ page / component แม่อ่านแล้วเห็นโครงสร้างจากชื่อ component ได้ทันที
   - ส่วนที่ใช้ซ้ำตั้งแต่ 2 ที่ขึ้นไป หรือเป็นก้อน UI ที่มีหน้าที่ชัดเจน (เช่น ปุ่ม icon, แถวเมนู, การ์ด) ให้แยกไฟล์ใน `src/components/` ไม่เขียน markup ซ้ำ
-  - ก่อนเขียน UI ใหม่ ดูก่อนว่ามี component เดิมใช้ได้ไหม (เช่น `BaseModal`, `BackButton`, `ClearableField`, `SettingsSection` / `SettingsRow`)
+  - ก่อนเขียน UI ใหม่ ดูก่อนว่ามี component เดิมใช้ได้ไหม (เช่น `BaseModal`, `BackButton`, `ClearableField`, `SearchField`, `FieldError`, `SettingsSection` / `SettingsRow`)
   - component รับข้อมูลผ่าน props, ส่ง action ออกผ่าน emit — การนำทาง / เขียน DB ให้ page หรือ composable จัดการ
 - Comment และข้อความ UI เป็น **ภาษาไทย**
 - สี / radius ใช้ design token จาก `@theme` ใน [src/style.css](../src/style.css) ผ่าน `bg-[var(--color-surface)]` ฯลฯ — อย่า hardcode สีใหม่
