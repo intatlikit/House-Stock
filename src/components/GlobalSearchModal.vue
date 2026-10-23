@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { watch } from 'vue'
 import BaseModal from '@/components/BaseModal.vue'
+import ClearableField from '@/components/ClearableField.vue'
 import { useGlobalSearch } from '@/composables/useGlobalSearch'
 
 const { query, isSearching, results, search, close } = useGlobalSearch()
@@ -14,14 +15,16 @@ watch(query, (value) => {
 
 <template>
   <BaseModal title="ค้นหาสิ่งของทุกบ้าน" max-width="max-w-2xl" @close="close">
-    <input
-      :value="query"
-      type="text"
-      placeholder="พิมพ์ชื่อสิ่งของ หรือ tag..."
-      autofocus
-      class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-sm"
-      @input="search(($event.target as HTMLInputElement).value)"
-    />
+    <ClearableField :show="Boolean(query)" @clear="search('')">
+      <input
+        :value="query"
+        type="text"
+        placeholder="พิมพ์ชื่อสิ่งของ หรือ tag..."
+        autofocus
+        class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-sm"
+        @input="search(($event.target as HTMLInputElement).value)"
+      />
+    </ClearableField>
 
     <div class="mt-4 max-h-[60vh] space-y-5 overflow-y-auto">
       <p v-if="isSearching" class="text-sm text-[var(--color-text-muted)]">กำลังค้นหา...</p>

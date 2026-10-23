@@ -2,6 +2,8 @@
 
 เว็บแอปเก็บ stock ของใช้ในบ้าน แยกตามบ้าน พร้อมแจ้งวันหมดอายุ — Vue 3 + TypeScript + Tailwind v4 + Supabase, deploy ขึ้น GitHub Pages
 
+> **กฎ: Claude ต้องตอบกลับผู้ใช้เป็นภาษาไทยเสมอ** (ชื่อไฟล์ / โค้ด / คำศัพท์เทคนิคใช้ภาษาอังกฤษได้ตามปกติ)
+
 ## คำสั่ง
 
 ```bash
@@ -51,6 +53,7 @@ supabase/schema.sql   schema + RLS สำหรับรันใน Supabase SQ
 - สี / radius ใช้ design token จาก `@theme` ใน [src/style.css](../src/style.css) ผ่าน `bg-[var(--color-surface)]` ฯลฯ — อย่า hardcode สีใหม่
 - เว็บเป็น **dark mode อย่างเดียว** — ไม่มี light mode / ปุ่มสลับธีม, token ใน `@theme` เป็นค่าโทนมืดโดยตรง
 - โทนสีถนอมสายตา (เขียวเสจ, ไม่ใช้ขาว/ดำสนิท) — ของใหม่ควรเข้ากับโทนเดิม
+- **กฎ: ทุกช่องที่พิมพ์ข้อความได้ต้องมีปุ่ม ✕ ล้างค่า** — ครอบ `<input>` ด้วย [ClearableField](../src/components/ClearableField.vue) (`:show` = มีค่าอยู่, `@clear` = ตั้งค่าว่างเอง เช่น `''` หรือ `null` สำหรับช่องตัวเลขที่ไม่บังคับ) ยกเว้นช่องจำนวน (ทั้ง QuantityStepper ที่มีปุ่ม +/- และช่องจำนวนในฟอร์ม), select และช่องวันที่
 
 ## Deploy
 

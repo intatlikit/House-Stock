@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import BaseModal from '@/components/BaseModal.vue'
+import ClearableField from '@/components/ClearableField.vue'
 import { useTags } from '@/composables/useTags'
 import { useLocations } from '@/composables/useLocations'
 import { useHouses } from '@/composables/useHouses'
@@ -156,7 +157,8 @@ async function submit() {
       // ใช้ ?? แทน || เพื่อให้บันทึกจำนวน 0 ได้ (ของหมดแล้วแต่ยังอยากเก็บรายการไว้)
       quantity: baseQuantity.value + Number(quantity.value ?? 1),
       expiry_date: expiryDate.value || null,
-      price: price.value === null || price.value === undefined ? null : Number(price.value),
+      // ลบตัวเลขออกจนว่าง v-model.number จะได้ '' — ถือว่าไม่ระบุราคา ไม่ใช่ 0
+      price: typeof price.value === 'number' ? price.value : null,
       location_id: locationId.value || null,
       new_location_name: newLocationName.value.trim() || null,
     }
@@ -219,13 +221,15 @@ async function submit() {
         </div>
 
         <div class="mt-2 rounded-[var(--radius-control)] border border-[var(--color-border)] p-2">
-          <input
-            v-model="pickerQuery"
-            type="text"
-            placeholder="ค้นหาชื่อสิ่งของ หรือ tag..."
-            :class="fieldClass"
-            @keydown.enter.prevent
-          />
+          <ClearableField :show="Boolean(pickerQuery)" @clear="pickerQuery = ''">
+            <input
+              v-model="pickerQuery"
+              type="text"
+              placeholder="ค้นหาชื่อสิ่งของ หรือ tag..."
+              :class="fieldClass"
+              @keydown.enter.prevent
+            />
+          </ClearableField>
           <div class="mt-2 max-h-60 overflow-y-auto">
             <p v-if="isLoadingExisting" class="px-1 text-sm text-[var(--color-text-muted)]">กำลังโหลด...</p>
             <p v-else-if="existingError" class="px-1 text-sm text-[var(--color-danger)]">
@@ -283,7 +287,9 @@ async function submit() {
       <template v-if="mode === 'new' || sourceItem">
         <div>
           <label :class="labelClass">ชื่อสิ่งของ *</label>
-          <input v-model="name" type="text" required autofocus :class="fieldClass" />
+          <ClearableField :show="Boolean(name)" @clear="name = ''">
+            <input v-model="name" type="text" required autofocus :class="fieldClass" />
+          </ClearableField>
         </div>
 
         <!-- มือถือเรียงลงมาทีละช่อง, จอใหญ่ขึ้นเลือก/พิมพ์ใหม่วางข้างกัน -->
@@ -294,7 +300,9 @@ async function submit() {
               <option value="">เลือก tag ที่มีอยู่...</option>
               <option v-for="tag in tags" :key="tag.id" :value="tag.id">{{ tag.name }}</option>
             </select>
-            <input v-model="newTagName" type="text" placeholder="หรือพิมพ์ tag ใหม่" :class="fieldClass" />
+            <ClearableField :show="Boolean(newTagName)" @clear="newTagName = ''">
+              <input v-model="newTagName" type="text" placeholder="หรือพิมพ์ tag ใหม่" :class="fieldClass" />
+            </ClearableField>
           </div>
         </div>
 
@@ -309,14 +317,17 @@ async function submit() {
           </div>
           <div class="min-w-0">
             <label :class="labelClass">ราคา</label>
-            <input
-              v-model.number="price"
-              type="number"
-              min="0"
-              step="0.01"
-              inputmode="decimal"
-              :class="fieldClass"
-            />
+            <!-- ราคาว่าง = null (ไม่ระบุ) ไม่ใช่ 0 -->
+            <ClearableField :show="price !== null && String(price) !== ''" @clear="price = null">
+              <input
+                v-model.number="price"
+                type="number"
+                min="0"
+                step="0.01"
+                inputmode="decimal"
+                :class="fieldClass"
+              />
+            </ClearableField>
           </div>
           <div class="col-span-2 min-w-0 sm:col-span-1">
             <label :class="labelClass">วันหมดอายุ</label>
@@ -332,7 +343,9 @@ async function submit() {
               <option value="">เลือกสถานที่ที่เคยเพิ่ม...</option>
               <option v-for="loc in locations" :key="loc.id" :value="loc.id">{{ loc.name }}</option>
             </select>
-            <input v-model="newLocationName" type="text" placeholder="หรือพิมพ์สถานที่ใหม่" :class="fieldClass" />
+            <ClearableField :show="Boolean(newLocationName)" @clear="newLocationName = ''">
+              <input v-model="newLocationName" type="text" placeholder="หรือพิมพ์สถานที่ใหม่" :class="fieldClass" />
+            </ClearableField>
           </div>
         </div>
       </template>

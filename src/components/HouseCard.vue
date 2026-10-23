@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import type { House } from '@/types'
 import { useHouses } from '@/composables/useHouses'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import ClearableField from '@/components/ClearableField.vue'
 
 const props = defineProps<{ house: House }>()
 
@@ -66,16 +67,17 @@ async function confirmDelete() {
     </span>
 
     <div class="min-w-0 flex-1">
-      <input
-        v-if="isEditing"
-        v-model="draftName"
-        type="text"
-        autofocus
-        class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-2 py-1 text-sm"
-        @click.stop
-        @keyup.enter="saveEdit"
-        @keyup.esc="cancelEdit"
-      />
+      <ClearableField v-if="isEditing" :show="Boolean(draftName)" @clear="draftName = ''">
+        <input
+          v-model="draftName"
+          type="text"
+          autofocus
+          class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-2 py-1 text-sm"
+          @click.stop
+          @keyup.enter="saveEdit"
+          @keyup.esc="cancelEdit"
+        />
+      </ClearableField>
       <p v-else class="truncate text-sm font-semibold text-[var(--color-text)]">
         {{ house.name }}
       </p>

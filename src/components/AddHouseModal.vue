@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import BaseModal from '@/components/BaseModal.vue'
+import ClearableField from '@/components/ClearableField.vue'
 import { useHouses } from '@/composables/useHouses'
 
 const emit = defineEmits<{ close: [] }>()
@@ -25,13 +26,15 @@ async function submit() {
 <template>
   <BaseModal title="เพิ่มบ้านใหม่" max-width="max-w-sm" @close="emit('close')">
     <form class="space-y-4" @submit.prevent="submit">
-      <input
-        v-model="name"
-        type="text"
-        autofocus
-        placeholder="ชื่อบ้าน เช่น บ้านหลัก, คอนโด"
-        class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-sm"
-      />
+      <ClearableField :show="Boolean(name)" @clear="name = ''">
+        <input
+          v-model="name"
+          type="text"
+          autofocus
+          placeholder="ชื่อบ้าน เช่น บ้านหลัก, คอนโด"
+          class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] px-3 py-2 text-sm"
+        />
+      </ClearableField>
       <button
         type="submit"
         :disabled="!name.trim() || isSubmitting"

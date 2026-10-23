@@ -8,6 +8,7 @@ import ItemTable from '@/components/ItemTable.vue'
 import ItemFormModal from '@/components/ItemFormModal.vue'
 import ItemDetailModal from '@/components/ItemDetailModal.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import ClearableField from '@/components/ClearableField.vue'
 import { useHouses } from '@/composables/useHouses'
 import { useItemsForHouse } from '@/composables/useItems'
 import { useTags } from '@/composables/useTags'
@@ -96,23 +97,14 @@ async function confirmDelete() {
     <!-- pb-24 กันไม่ให้ปุ่มลอยบังแถวล่างสุดของตาราง -->
     <main class="mx-auto max-w-5xl space-y-4 px-4 pt-6 pb-24 sm:px-6">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <div class="relative flex-1">
+        <ClearableField class="flex-1" :show="Boolean(searchQuery)" @clear="clearSearch">
           <input
             v-model="searchQuery"
             type="text"
             placeholder="ค้นหาสิ่งของด้วยชื่อ หรือ tag..."
-            class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 pr-9 text-sm"
+            class="w-full rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm"
           />
-          <button
-            v-if="searchQuery"
-            type="button"
-            class="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
-            aria-label="ล้างคำค้นหา"
-            @click="clearSearch"
-          >
-            ✕
-          </button>
-        </div>
+        </ClearableField>
       </div>
 
       <!-- tag แนะนำ กดเพื่อ filter ด้วย tag นั้น กดซ้ำเพื่อยกเลิก -->
