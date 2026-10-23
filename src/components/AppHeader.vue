@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
+import SettingsButton from '@/components/SettingsButton.vue'
 import { APP_VERSION } from '@/lib/version'
+
+const route = useRoute()
 </script>
 
 <template>
@@ -19,6 +23,8 @@ import { APP_VERSION } from '@/lib/version'
 
     <div class="flex items-center gap-3">
       <slot name="actions" />
+      <!-- ปุ่มเปิดหน้าตั้งค่า แสดงทุกหน้ายกเว้นหน้าตั้งค่าเอง -->
+      <SettingsButton v-if="route.name !== 'settings'" />
     </div>
   </header>
 </template>

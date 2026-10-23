@@ -17,6 +17,11 @@ const router = createRouter({
       component: () => import('@/pages/HouseDetailPage.vue'),
       props: true,
     },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('@/pages/SettingsPage.vue'),
+    },
   ],
 })
 

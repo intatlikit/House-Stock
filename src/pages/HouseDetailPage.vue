@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
+import BackButton from '@/components/BackButton.vue'
 import FabButton from '@/components/FabButton.vue'
 import ScrollTopButton from '@/components/ScrollTopButton.vue'
 import ItemTable from '@/components/ItemTable.vue'
@@ -84,13 +85,7 @@ async function confirmDelete() {
   <div class="min-h-full">
     <AppHeader>
       <template #left>
-        <button
-          type="button"
-          class="flex items-center gap-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-          @click="router.push({ name: 'landing' })"
-        >
-          ← <span class="font-semibold text-[var(--color-text)]">{{ house?.name ?? 'บ้าน' }}</span>
-        </button>
+        <BackButton :label="house?.name ?? 'บ้าน'" @click="router.push({ name: 'landing' })" />
       </template>
     </AppHeader>
 
