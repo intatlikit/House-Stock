@@ -77,11 +77,10 @@ const filteredGroups = computed(() => {
 })
 
 // เลือกของเดิมจากบ้านนี้ = บันทึกทับ record เดิม, จากบ้านอื่น = แค่ยืมข้อมูลมาเพิ่มเป็นชิ้นใหม่
-const overwriteItemId = computed(() =>
-  mode.value === 'existing' && sourceItem.value?.house_id === props.houseId
-    ? sourceItem.value.id
-    : null,
-)
+const overwriteItemId = computed(() => {
+  const source = sourceItem.value
+  return mode.value === 'existing' && source && source.house_id === props.houseId ? source.id : null
+})
 
 const sourceHouseName = computed(
   () => existingGroups.value.find((g) => g.house.id === sourceItem.value?.house_id)?.house.name ?? '',
