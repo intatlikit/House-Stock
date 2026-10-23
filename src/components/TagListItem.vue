@@ -65,7 +65,8 @@ async function confirmDelete() {
 </script>
 
 <template>
-  <li class="flex items-start gap-3 px-4 py-3">
+  <!-- ปกติจัดชื่อให้อยู่กึ่งกลางแนวตั้งกับไอคอน, ตอนแก้ไขชิดบนเพื่อไม่ให้ปุ่มเลื่อนลงเมื่อมีข้อความเตือนใต้ช่อง -->
+  <li class="flex gap-3 px-4 py-3" :class="isEditing ? 'items-start' : 'items-center'">
     <div class="min-w-0 flex-1">
       <template v-if="isEditing">
         <ClearableField :show="Boolean(draftName)" @clear="draftName = ''">
@@ -82,7 +83,7 @@ async function confirmDelete() {
         </ClearableField>
         <FieldError :message="errorMessage" />
       </template>
-      <p v-else class="truncate py-1 text-sm text-[var(--color-text)]">{{ tag.name }}</p>
+      <p v-else class="truncate text-sm text-[var(--color-text)]">{{ tag.name }}</p>
     </div>
 
     <div class="flex shrink-0 items-center gap-1">
