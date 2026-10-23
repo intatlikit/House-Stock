@@ -65,3 +65,4 @@ supabase/schema.sql   schema + RLS สำหรับรันใน Supabase SQ
 - Push เข้า `main` → GitHub Actions ([.github/workflows/main.yml](../.github/workflows/main.yml)) build แล้ว deploy ขึ้น GitHub Pages
 - ค่า Supabase ตอน build มาจาก repo secrets `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`
 - ออก version ใหม่: bump `version` ใน `package.json` — `APP_VERSION` จะอัปเดตตาม
+- **กฎ: ทุกครั้งที่ทำงานที่แก้โค้ดของเว็บเสร็จ ต้องใช้ skill [version-bump](skills/version-bump/SKILL.md)** วิเคราะห์ว่าเป็น major / minor / patch แล้วขยับ version ก่อนสรุปงาน — ไม่ต้องรอผู้ใช้สั่ง (ยกเว้นผู้ใช้ระบุเลข version มาเอง)

@@ -61,14 +61,19 @@ const filteredItems = computed(() => {
 // ยังไม่เลือกปลายทาง หรือกำลังโหลดของปลายทาง (ต้องรู้ว่ามีชื่อซ้ำไหม) = ยังกดย้ายไม่ได้
 const canMove = computed(() => Boolean(toHouseId.value) && !isDestLoading.value)
 
+// เลือกบ้านต้นทางแล้ว ตั้งบ้านปลายทางเป็นหลังแรกที่เหลือให้เสมอ (เปลี่ยนเองทีหลังได้)
 async function selectFromHouse(houseId: string) {
   if (fromHouseId.value === houseId) return
   fromHouseId.value = houseId
   searchQuery.value = ''
   activeTagId.value = null
-  if (toHouseId.value === houseId) toHouseId.value = ''
+  toHouseId.value = ''
   isSourceLoading.value = true
-  await fetchItemsForHouse(houseId)
+  const firstDestination = destinationHouses.value[0]
+  await Promise.all([
+    fetchItemsForHouse(houseId),
+    firstDestination ? selectToHouse(firstDestination.id) : Promise.resolve(),
+  ])
   isSourceLoading.value = false
 }
 
