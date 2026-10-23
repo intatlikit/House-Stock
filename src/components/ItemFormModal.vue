@@ -2,6 +2,8 @@
 import { computed, onMounted, ref } from 'vue'
 import BaseModal from '@/components/BaseModal.vue'
 import ClearableField from '@/components/ClearableField.vue'
+import ChipButton from '@/components/ChipButton.vue'
+import ItemListRow from '@/components/ItemListRow.vue'
 import { useTags } from '@/composables/useTags'
 import { useLocations } from '@/composables/useLocations'
 import { useHouses } from '@/composables/useHouses'
@@ -12,6 +14,12 @@ const props = defineProps<{
   item?: ItemWithRelations | null
   // บ้านที่เปิดอยู่ — ใช้แยกว่าของเดิมที่เลือกอยู่บ้านนี้ (บันทึกทับ) หรือบ้านอื่น (ยืมข้อมูลมาเพิ่มเป็นชิ้นใหม่)
   houseId?: string
+  // โหมดเพิ่มแบบมีข้อมูลตั้งต้น (เช่น ย้ายของมาเป็นของใหม่) — เติมฟอร์มให้และซ่อนตัวเลือก "ใช้ของเดิม"
+  prefill?: ItemWithRelations | null
+  // ล็อกช่องจำนวนไม่ให้แก้ (เช่น จำนวนที่ย้ายถูกกำหนดไว้แล้ว)
+  lockQuantity?: boolean
+  title?: string
+  submitLabel?: string
 }>()
 
 const emit = defineEmits<{
@@ -48,7 +56,7 @@ function fillForm(source: ItemWithRelations | null) {
   locationId.value = source?.location_id ?? ''
   newLocationName.value = ''
 }
-fillForm(props.item ?? null)
+fillForm(props.item ?? props.prefill ?? null)
 
 // ===== โหมดเพิ่ม: ของใหม่ หรือ ใช้ของเดิม =====
 type AddMode = 'new' | 'existing'
@@ -142,10 +150,6 @@ onMounted(() => {
   fetchLocations()
 })
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
 async function submit() {
   if (!canSubmit.value) return
   isSubmitting.value = true
@@ -170,11 +174,15 @@ async function submit() {
 </script>
 
 <template>
-  <BaseModal :title="isEditMode ? 'แก้ไขสิ่งของ' : 'เพิ่มสิ่งของ'" max-width="max-w-lg" @close="emit('close')">
+  <BaseModal
+    :title="title ?? (isEditMode ? 'แก้ไขสิ่งของ' : 'เพิ่มสิ่งของ')"
+    max-width="max-w-lg"
+    @close="emit('close')"
+  >
     <form class="space-y-4" @submit.prevent="submit">
-      <!-- เลือกโหมดเฉพาะตอนเพิ่ม: พิมพ์ของใหม่เอง หรือดึงข้อมูลจากของที่มีอยู่แล้ว -->
+      <!-- เลือกโหมดเฉพาะตอนเพิ่ม (ที่ไม่มีข้อมูลตั้งต้น): พิมพ์ของใหม่เอง หรือดึงข้อมูลจากของที่มีอยู่แล้ว -->
       <div
-        v-if="!isEditMode"
+        v-if="!isEditMode && !prefill"
         class="grid grid-cols-2 gap-1 rounded-[var(--radius-control)] bg-[var(--color-surface-muted)] p-1"
         role="group"
         aria-label="วิธีเพิ่มสิ่งของ"
@@ -203,21 +211,14 @@ async function submit() {
         <label :class="labelClass">เลือกบ้าน</label>
         <!-- ปุ่มเลือกบ้าน แล้วแสดงช่องค้นหา + สิ่งของของบ้านนั้นข้างล่าง -->
         <div class="flex flex-wrap gap-2">
-          <button
+          <ChipButton
             v-for="h in pickerHouses"
             :key="h.id"
-            type="button"
-            class="rounded-full border px-3 py-1 text-xs transition"
-            :class="
-              pickerHouseId === h.id
-                ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] font-medium text-[var(--color-primary-dark)]'
-                : 'border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]'
-            "
-            :aria-pressed="pickerHouseId === h.id"
+            :active="pickerHouseId === h.id"
             @click="selectPickerHouse(h.id)"
           >
             {{ h.name }}<span v-if="h.id === houseId"> (บ้านนี้)</span>
-          </button>
+          </ChipButton>
         </div>
 
         <div class="mt-2 rounded-[var(--radius-control)] border border-[var(--color-border)] p-2">
@@ -241,28 +242,11 @@ async function submit() {
 
             <ul v-else class="space-y-1">
               <li v-for="existing in pickerItems" :key="existing.id">
-                <button
-                  type="button"
-                  class="flex w-full items-center justify-between gap-2 rounded-[var(--radius-control)] border px-3 py-2 text-left text-sm transition"
-                  :class="
-                    sourceItem?.id === existing.id
-                      ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)]'
-                      : 'border-transparent bg-[var(--color-surface-muted)] hover:border-[var(--color-primary)]'
-                  "
+                <ItemListRow
+                  :item="existing"
+                  :selected="sourceItem?.id === existing.id"
                   @click="pickItem(existing)"
-                >
-                  <span class="min-w-0 truncate font-medium text-[var(--color-text)]">{{ existing.name }}</span>
-                  <span class="flex shrink-0 items-center gap-2 text-xs text-[var(--color-text-muted)]">
-                    <span
-                      v-if="existing.tag"
-                      class="rounded-full bg-[var(--color-primary-light)] px-2 py-0.5 text-[var(--color-primary-dark)]"
-                    >
-                      {{ existing.tag.name }}
-                    </span>
-                    <span>×{{ existing.quantity }}</span>
-                    <span v-if="existing.expiry_date">{{ formatDate(existing.expiry_date) }}</span>
-                  </span>
-                </button>
+                />
               </li>
             </ul>
           </div>
@@ -310,7 +294,15 @@ async function submit() {
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div class="min-w-0">
             <label :class="labelClass">{{ overwriteItemId ? 'จำนวนที่เพิ่ม *' : 'จำนวน *' }}</label>
-            <input v-model.number="quantity" type="number" min="0" required inputmode="decimal" :class="fieldClass" />
+            <input
+              v-model.number="quantity"
+              type="number"
+              min="0"
+              required
+              inputmode="decimal"
+              :disabled="lockQuantity"
+              :class="[fieldClass, 'disabled:opacity-60']"
+            />
             <p v-if="overwriteItemId" class="mt-1 text-xs text-[var(--color-text-muted)]">
               เดิม {{ baseQuantity }} → รวม {{ baseQuantity + Number(quantity ?? 0) }}
             </p>
@@ -364,7 +356,7 @@ async function submit() {
           :disabled="!canSubmit"
           class="w-full rounded-[var(--radius-control)] bg-[var(--color-primary)] py-2.5 text-sm font-semibold text-white disabled:opacity-50"
         >
-          {{ isEditMode ? 'บันทึกการแก้ไข' : overwriteItemId ? 'เพิ่มเข้ารายการเดิม' : 'เพิ่มสิ่งของ' }}
+          {{ submitLabel ?? (isEditMode ? 'บันทึกการแก้ไข' : overwriteItemId ? 'เพิ่มเข้ารายการเดิม' : 'เพิ่มสิ่งของ') }}
         </button>
       </div>
     </form>

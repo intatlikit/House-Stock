@@ -6,6 +6,7 @@ import BackButton from '@/components/BackButton.vue'
 import SearchField from '@/components/SearchField.vue'
 import TagListItem from '@/components/TagListItem.vue'
 import AddTagModal from '@/components/AddTagModal.vue'
+import FabGroup from '@/components/FabGroup.vue'
 import FabButton from '@/components/FabButton.vue'
 import ScrollTopButton from '@/components/ScrollTopButton.vue'
 import { useTags } from '@/composables/useTags'
@@ -57,7 +58,9 @@ onMounted(fetchTags)
     </main>
 
     <ScrollTopButton />
-    <FabButton label="เพิ่ม tag" @click="showAddTag = true" />
+    <FabGroup>
+      <FabButton label="เพิ่ม tag" @click="showAddTag = true" />
+    </FabGroup>
 
     <AddTagModal v-if="showAddTag" @close="showAddTag = false" />
   </div>

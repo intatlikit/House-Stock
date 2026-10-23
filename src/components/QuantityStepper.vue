@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 
-const props = defineProps<{
-  quantity: number
-}>()
+// min / max ไม่ใส่ = ไม่ต่ำกว่า 0 และไม่จำกัดค่าสูงสุด
+const props = withDefaults(
+  defineProps<{
+    quantity: number
+    min?: number
+    max?: number
+  }>(),
+  { min: 0, max: Infinity },
+)
 
 const emit = defineEmits<{
   change: [quantity: number]
@@ -19,7 +25,7 @@ watch(
 )
 
 function update(value: number) {
-  const next = Math.max(0, value)
+  const next = Math.min(props.max, Math.max(props.min, value))
   if (next === props.quantity) {
     draft.value = String(props.quantity)
     return
@@ -47,7 +53,7 @@ const buttonClass =
       type="button"
       :class="buttonClass"
       aria-label="ลดจำนวน"
-      :disabled="quantity <= 0"
+      :disabled="quantity <= min"
       @click="update(quantity - 1)"
     >
       −
@@ -62,7 +68,13 @@ const buttonClass =
       @blur="commitDraft"
       @keydown.enter="($event.target as HTMLInputElement).blur()"
     />
-    <button type="button" :class="buttonClass" aria-label="เพิ่มจำนวน" @click="update(quantity + 1)">
+    <button
+      type="button"
+      :class="buttonClass"
+      aria-label="เพิ่มจำนวน"
+      :disabled="quantity >= max"
+      @click="update(quantity + 1)"
+    >
       +
     </button>
   </div>

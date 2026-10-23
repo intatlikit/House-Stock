@@ -10,7 +10,7 @@ const UNIQUE_VIOLATION = '23505'
 const DUPLICATE_MESSAGE = 'มี tag ชื่อนี้อยู่แล้ว'
 
 /** เรียงชื่อ tag: ขึ้นต้นด้วยภาษาอังกฤษก่อน แล้วตามด้วยภาษาอื่น (ไทย ฯลฯ) — ในกลุ่มเดียวกันเรียงตามตัวอักษร */
-function compareTagNames(a: string, b: string) {
+export function compareTagNames(a: string, b: string) {
   const aIsEnglish = /^[a-z]/i.test(a)
   const bIsEnglish = /^[a-z]/i.test(b)
   if (aIsEnglish !== bIsEnglish) return aIsEnglish ? -1 : 1

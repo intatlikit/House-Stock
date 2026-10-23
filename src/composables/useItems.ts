@@ -97,10 +97,102 @@ function sortItems(items: ItemWithRelations[], sort: SortState | null): ItemWith
   return sorted
 }
 
-function useItemsForHouse(houseId: string) {
+/** แปลง tag / สถานที่ที่พิมพ์ใหม่ในฟอร์มเป็น id (สร้างใหม่ถ้ายังไม่มี) */
+async function resolveRelationIds(payload: ItemFormPayload) {
   const { getOrCreateTag } = useTags()
   const { getOrCreateLocation } = useLocations()
 
+  let tagId = payload.tag_id
+  if (!tagId && payload.new_tag_name) {
+    tagId = (await getOrCreateTag(payload.new_tag_name)).id
+  }
+  let locationId = payload.location_id
+  if (!locationId && payload.new_location_name) {
+    locationId = (await getOrCreateLocation(payload.new_location_name)).id
+  }
+  return { tagId, locationId }
+}
+
+async function insertItem(houseId: string, payload: ItemFormPayload): Promise<ItemWithRelations> {
+  const { tagId, locationId } = await resolveRelationIds(payload)
+
+  const { data, error: err } = await supabase
+    .from('items')
+    .insert({
+      house_id: houseId,
+      name: payload.name,
+      tag_id: tagId,
+      quantity: payload.quantity,
+      expiry_date: payload.expiry_date,
+      price: payload.price,
+      location_id: locationId,
+    })
+    .select(SELECT_WITH_RELATIONS)
+    .single()
+
+  if (err) throw err
+  const created = data as unknown as ItemWithRelations
+  itemsByHouse.value[houseId] = [...(itemsByHouse.value[houseId] ?? []), created]
+  return created
+}
+
+/** รายการ item ของบ้าน (ที่โหลดไว้แล้วด้วย fetchItemsForHouse) — ใช้ใน computed ได้ */
+function getItemsOfHouse(houseId: string): ItemWithRelations[] {
+  return itemsByHouse.value[houseId] ?? []
+}
+
+// เขียนจำนวนใหม่ลง DB แล้วอัปเดต item ตัวนั้นใน memory (ถ้าบ้านนั้นโหลดไว้)
+async function writeQuantity(item: ItemWithRelations, quantity: number) {
+  const { error: err } = await supabase
+    .from('items')
+    .update({ quantity, updated_at: new Date().toISOString() })
+    .eq('id', item.id)
+  if (err) throw err
+
+  const list = itemsByHouse.value[item.house_id]
+  if (list) {
+    itemsByHouse.value[item.house_id] = list.map((i) => (i.id === item.id ? { ...i, quantity } : i))
+  }
+}
+
+// ทศนิยมบวกลบกันแล้วเพี้ยน (เช่น 0.1 + 0.2) — ปัดเหลือ 3 ตำแหน่ง
+function roundQuantity(value: number) {
+  return Math.round(value * 1000) / 1000
+}
+
+/**
+ * ย้ายของไปรวมกับของชื่อเดียวกันที่บ้านปลายทาง: บวกแค่จำนวนให้ปลายทาง ข้อมูลอื่นของปลายทางคงเดิม
+ * แล้วหักจำนวนจากต้นทาง (ย้ายหมดจะเหลือ 0 ไม่ลบรายการทิ้ง)
+ * Supabase ไม่มี transaction จากฝั่ง client — ถ้าหักต้นทางพลาดจะคืนจำนวนปลายทางให้
+ */
+async function moveItemToExisting(source: ItemWithRelations, target: ItemWithRelations, quantity: number) {
+  await writeQuantity(target, roundQuantity(target.quantity + quantity))
+  try {
+    await writeQuantity(source, roundQuantity(source.quantity - quantity))
+  } catch (err) {
+    await writeQuantity(target, target.quantity).catch(() => {})
+    throw err
+  }
+}
+
+/**
+ * ย้ายของไปเป็นของชิ้นใหม่ที่บ้านปลายทาง (payload.quantity = จำนวนที่ย้าย) แล้วหักจำนวนจากต้นทาง
+ * ถ้าหักต้นทางพลาดจะลบของที่เพิ่งสร้างทิ้ง
+ */
+async function moveItemAsNew(source: ItemWithRelations, toHouseId: string, payload: ItemFormPayload) {
+  const created = await insertItem(toHouseId, payload)
+  try {
+    await writeQuantity(source, roundQuantity(source.quantity - payload.quantity))
+  } catch (err) {
+    const { error: rollbackErr } = await supabase.from('items').delete().eq('id', created.id)
+    if (!rollbackErr) {
+      itemsByHouse.value[toHouseId] = getItemsOfHouse(toHouseId).filter((i) => i.id !== created.id)
+    }
+    throw err
+  }
+}
+
+function useItemsForHouse(houseId: string) {
   const rawItems = computed(() => itemsByHouse.value[houseId] ?? [])
 
   const searchQuery = ref('')
@@ -133,44 +225,12 @@ function useItemsForHouse(houseId: string) {
     searchQuery.value = ''
   }
 
-  async function addItem(payload: ItemFormPayload) {
-    let tagId = payload.tag_id
-    if (!tagId && payload.new_tag_name) {
-      tagId = (await getOrCreateTag(payload.new_tag_name)).id
-    }
-    let locationId = payload.location_id
-    if (!locationId && payload.new_location_name) {
-      locationId = (await getOrCreateLocation(payload.new_location_name)).id
-    }
-
-    const { data, error: err } = await supabase
-      .from('items')
-      .insert({
-        house_id: houseId,
-        name: payload.name,
-        tag_id: tagId,
-        quantity: payload.quantity,
-        expiry_date: payload.expiry_date,
-        price: payload.price,
-        location_id: locationId,
-      })
-      .select(SELECT_WITH_RELATIONS)
-      .single()
-
-    if (err) throw err
-    itemsByHouse.value[houseId] = [...rawItems.value, data as unknown as ItemWithRelations]
-    return data
+  function addItem(payload: ItemFormPayload) {
+    return insertItem(houseId, payload)
   }
 
   async function updateItem(itemId: string, payload: ItemFormPayload) {
-    let tagId = payload.tag_id
-    if (!tagId && payload.new_tag_name) {
-      tagId = (await getOrCreateTag(payload.new_tag_name)).id
-    }
-    let locationId = payload.location_id
-    if (!locationId && payload.new_location_name) {
-      locationId = (await getOrCreateLocation(payload.new_location_name)).id
-    }
+    const { tagId, locationId } = await resolveRelationIds(payload)
 
     const { data, error: err } = await supabase
       .from('items')
@@ -239,4 +299,12 @@ function useItemsForHouse(houseId: string) {
   }
 }
 
-export { useItemsForHouse, fetchItemsForHouse, fetchAllItemsGroupedByHouse }
+export {
+  useItemsForHouse,
+  fetchItemsForHouse,
+  fetchAllItemsGroupedByHouse,
+  getItemsOfHouse,
+  defaultSortItems,
+  moveItemToExisting,
+  moveItemAsNew,
+}

@@ -3,7 +3,9 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import BackButton from '@/components/BackButton.vue'
+import FabGroup from '@/components/FabGroup.vue'
 import FabButton from '@/components/FabButton.vue'
+import ChipButton from '@/components/ChipButton.vue'
 import ScrollTopButton from '@/components/ScrollTopButton.vue'
 import ItemTable from '@/components/ItemTable.vue'
 import ItemFormModal from '@/components/ItemFormModal.vue'
@@ -104,21 +106,9 @@ async function confirmDelete() {
 
       <!-- tag แนะนำ กดเพื่อ filter ด้วย tag นั้น กดซ้ำเพื่อยกเลิก -->
       <div v-if="tags.length" class="flex flex-wrap gap-2">
-        <button
-          v-for="tag in tags"
-          :key="tag.id"
-          type="button"
-          class="rounded-full border px-2.5 py-1 text-xs transition"
-          :class="
-            isTagActive(tag.name)
-              ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] font-medium text-[var(--color-primary-dark)]'
-              : 'border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]'
-          "
-          :aria-pressed="isTagActive(tag.name)"
-          @click="toggleTag(tag.name)"
-        >
+        <ChipButton v-for="tag in tags" :key="tag.id" :active="isTagActive(tag.name)" @click="toggleTag(tag.name)">
           {{ tag.name }}
-        </button>
+        </ChipButton>
       </div>
 
       <ItemTable
@@ -133,7 +123,9 @@ async function confirmDelete() {
     </main>
 
     <ScrollTopButton />
-    <FabButton label="เพิ่มสิ่งของ" @click="showAddModal = true" />
+    <FabGroup>
+      <FabButton label="เพิ่มสิ่งของ" @click="showAddModal = true" />
+    </FabGroup>
 
     <ItemFormModal
       v-if="showAddModal"

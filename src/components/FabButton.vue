@@ -1,18 +1,32 @@
 <script setup lang="ts">
-defineProps<{ label: string }>()
+// ปุ่มลอยกลม ใช้ภายใน FabGroup (FabGroup เป็นตัวจัดตำแหน่งมุมขวาล่าง)
+// primary = ปุ่มหลักสีเขียว, secondary = ปุ่มรองพื้นเข้ม ขอบเขียว
+withDefaults(
+  defineProps<{
+    label: string
+    icon?: string
+    variant?: 'primary' | 'secondary'
+  }>(),
+  { icon: '+', variant: 'primary' },
+)
 defineEmits<{ click: [] }>()
 </script>
 
 <template>
-  <!-- ปุ่มลอยมุมขวาล่าง: จอเล็กแสดงแค่ "+", จอใหญ่แสดงข้อความด้วย -->
+  <!-- จอเล็กแสดงแค่ไอคอน, จอใหญ่แสดงข้อความด้วย -->
   <button
     type="button"
-    class="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 min-w-14 items-center justify-center gap-2 rounded-full bg-[var(--color-primary)] px-4 text-sm font-semibold text-[var(--color-bg)] shadow-lg shadow-black/30 transition hover:bg-[var(--color-primary-dark)] active:scale-95 sm:right-6"
+    class="flex h-14 min-w-14 items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold shadow-lg shadow-black/30 transition active:scale-95"
+    :class="
+      variant === 'primary'
+        ? 'bg-[var(--color-primary)] text-[var(--color-bg)] hover:bg-[var(--color-primary-dark)]'
+        : 'border border-[var(--color-primary)] bg-[var(--color-surface-muted)] text-[var(--color-primary)] hover:bg-[var(--color-primary-light)]'
+    "
     :aria-label="label"
     :title="label"
     @click="$emit('click')"
   >
-    <span class="text-2xl leading-none" aria-hidden="true">+</span>
+    <span class="text-2xl leading-none" aria-hidden="true">{{ icon }}</span>
     <span class="hidden sm:inline">{{ label }}</span>
   </button>
 </template>

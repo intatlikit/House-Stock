@@ -18,6 +18,11 @@ const router = createRouter({
       props: true,
     },
     {
+      path: '/move',
+      name: 'move-items',
+      component: () => import('@/pages/MoveItemsPage.vue'),
+    },
+    {
       path: '/settings',
       name: 'settings',
       component: () => import('@/pages/SettingsPage.vue'),

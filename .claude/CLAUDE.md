@@ -22,6 +22,7 @@ npm run preview   # preview production build
   - action ที่เขียน DB: เรียก Supabase ก่อน, `throw` error ถ้าพลาด, แล้วค่อยอัปเดต state ใน memory (ยกเว้น `reorderHouses` ที่อัปเดต state ก่อนเพื่อให้ UI ลื่น)
   - action ที่โหลดข้อมูล: เซ็ต `isLoading` / `error` แทนการ throw
 - `useItems` เก็บ item ของทุกบ้านใน `itemsByHouse` (key = `house_id`) และ join `tag` / `location` ด้วย `SELECT_WITH_RELATIONS`
+- ย้ายของ (`moveItemToExisting` / `moveItemAsNew`): ชื่อตรงกับของในบ้านปลายทาง (ไม่สนตัวพิมพ์) = บวกแค่จำนวน, ไม่ตรง = สร้างของใหม่ — ต้นทางหักจำนวน (ย้ายหมดเหลือ 0 ไม่ลบ), ไม่มี transaction จึง rollback เองถ้าขั้นที่ 2 พลาด
 - Default sort ของ item: วันหมดอายุใกล้สุดก่อน (ที่ไม่มีวันหมดอายุต่อท้าย) → วันหมดอายุเท่ากันเรียงตามชื่อ (ก-ฮ / A-Z) → ชื่อซ้ำกันตาม `created_at` เก่าสุดก่อน (`defaultSortItems` ใน `useItems.ts`)
 - Router ใช้ **hash history** (`/#/house/:id`) เพราะ GitHub Pages ไม่รองรับ SPA rewrite — อย่าเปลี่ยนเป็น `createWebHistory`
 - `vite.config.ts` ตั้ง `base: '/House-Stock/'` ตอน build — ถ้าเปลี่ยนชื่อ repo ต้องแก้ตรงนี้ด้วย
@@ -31,7 +32,7 @@ npm run preview   # preview production build
 
 ```
 src/
-  pages/        LandingPage (รายการบ้าน), HouseDetailPage (stock ของบ้าน), SettingsPage (ตั้งค่าเว็บ — เพิ่มเมนูด้วย `SettingsSection` + `SettingsRow`, เมนูที่เปิดหน้าย่อยใช้ `clickable`), TagSettingsPage (เพิ่ม/ค้นหา/แก้ชื่อ/ลบ tag — route `settings-tags`)
+  pages/        LandingPage (รายการบ้าน), HouseDetailPage (stock ของบ้าน), SettingsPage (ตั้งค่าเว็บ — เพิ่มเมนูด้วย `SettingsSection` + `SettingsRow`, เมนูที่เปิดหน้าย่อยใช้ `clickable`), TagSettingsPage (เพิ่ม/ค้นหา/แก้ชื่อ/ลบ tag — route `settings-tags`), MoveItemsPage (ย้ายของข้ามบ้าน — route `move-items`)
   components/   UI ย่อย, modal ทุกตัวครอบด้วย BaseModal (Teleport ไป body)
   composables/  useHouses, useItems, useTags, useLocations, useGlobalSearch
   lib/          supabase client, APP_VERSION (อ่านจาก package.json)
@@ -51,7 +52,7 @@ supabase/schema.sql   schema + RLS สำหรับรันใน Supabase SQ
 - Vue SFC ใช้ `<script setup lang="ts">`, `defineProps` / `defineEmits` แบบ type-based
 - **กฎ: แยก UI เป็น component เสมอเมื่อทำได้** — ให้ page / component แม่อ่านแล้วเห็นโครงสร้างจากชื่อ component ได้ทันที
   - ส่วนที่ใช้ซ้ำตั้งแต่ 2 ที่ขึ้นไป หรือเป็นก้อน UI ที่มีหน้าที่ชัดเจน (เช่น ปุ่ม icon, แถวเมนู, การ์ด) ให้แยกไฟล์ใน `src/components/` ไม่เขียน markup ซ้ำ
-  - ก่อนเขียน UI ใหม่ ดูก่อนว่ามี component เดิมใช้ได้ไหม (เช่น `BaseModal`, `BackButton`, `ClearableField`, `SearchField`, `FieldError`, `SettingsSection` / `SettingsRow`)
+  - ก่อนเขียน UI ใหม่ ดูก่อนว่ามี component เดิมใช้ได้ไหม (เช่น `BaseModal`, `BackButton`, `ClearableField`, `SearchField`, `FieldError`, `ChipButton`, `ItemListRow`, `SettingsSection` / `SettingsRow`, ปุ่มลอยใช้ `FabButton` ครอบด้วย `FabGroup`)
   - component รับข้อมูลผ่าน props, ส่ง action ออกผ่าน emit — การนำทาง / เขียน DB ให้ page หรือ composable จัดการ
 - Comment และข้อความ UI เป็น **ภาษาไทย**
 - สี / radius ใช้ design token จาก `@theme` ใน [src/style.css](../src/style.css) ผ่าน `bg-[var(--color-surface)]` ฯลฯ — อย่า hardcode สีใหม่
