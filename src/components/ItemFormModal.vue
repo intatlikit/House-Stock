@@ -14,6 +14,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   close: []
+  delete: []
   // overwriteItemId = id ของเดิมในบ้านนี้ที่ต้องบันทึกทับ, null = เพิ่มเป็นของชิ้นใหม่
   submit: [payload: ItemFormPayload, overwriteItemId: string | null]
 }>()
@@ -340,13 +341,23 @@ async function submit() {
         </div>
       </template>
 
-      <button
-        type="submit"
-        :disabled="!canSubmit"
-        class="w-full rounded-[var(--radius-control)] bg-[var(--color-primary)] py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-      >
-        {{ isEditMode ? 'บันทึกการแก้ไข' : overwriteItemId ? 'เพิ่มเข้ารายการเดิม' : 'เพิ่มสิ่งของ' }}
-      </button>
+      <div class="space-y-2">
+        <button
+          v-if="isEditMode"
+          type="button"
+          class="w-full rounded-[var(--radius-control)] border border-[var(--color-danger)] bg-transparent py-2.5 text-sm font-semibold text-[var(--color-danger)] transition hover:bg-[var(--color-danger-light)]"
+          @click="emit('delete')"
+        >
+          ลบสิ่งของชิ้นนี้
+        </button>
+        <button
+          type="submit"
+          :disabled="!canSubmit"
+          class="w-full rounded-[var(--radius-control)] bg-[var(--color-primary)] py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          {{ isEditMode ? 'บันทึกการแก้ไข' : overwriteItemId ? 'เพิ่มเข้ารายการเดิม' : 'เพิ่มสิ่งของ' }}
+        </button>
+      </div>
     </form>
   </BaseModal>
 </template>

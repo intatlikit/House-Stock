@@ -73,6 +73,8 @@ async function handleEditSubmit(payload: ItemFormPayload) {
 async function confirmDelete() {
   if (!deletingItem.value) return
   await deleteItem(deletingItem.value.id)
+  // ลบจากหน้าแก้ไข -> ปิดหน้าแก้ไขด้วย (กดยกเลิกใน confirm จะกลับมาหน้าแก้ไขเหมือนเดิม)
+  if (editingItem.value?.id === deletingItem.value.id) editingItem.value = null
   deletingItem.value = null
 }
 </script>
@@ -158,6 +160,7 @@ async function confirmDelete() {
       :item="editingItem"
       @close="editingItem = null"
       @submit="handleEditSubmit"
+      @delete="deletingItem = editingItem"
     />
 
     <ItemDetailModal v-if="viewingItem" :item="viewingItem" @close="viewingItem = null" />
