@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import BaseModal from '@/components/BaseModal.vue'
 import ClearableField from '@/components/ClearableField.vue'
 import ChipButton from '@/components/ChipButton.vue'
@@ -57,6 +57,20 @@ function fillForm(source: ItemWithRelations | null) {
   newLocationName.value = ''
 }
 fillForm(props.item ?? props.prefill ?? null)
+
+// เลือกจาก dropdown กับพิมพ์ใหม่ใช้ได้ทีละทาง: เลือกของที่มีอยู่ = ล้างช่องพิมพ์, พิมพ์ใหม่ = dropdown กลับเป็นไม่เลือก
+watch(tagId, (id) => {
+  if (id) newTagName.value = ''
+})
+watch(newTagName, (text) => {
+  if (text) tagId.value = ''
+})
+watch(locationId, (id) => {
+  if (id) newLocationName.value = ''
+})
+watch(newLocationName, (text) => {
+  if (text) locationId.value = ''
+})
 
 // ===== โหมดเพิ่ม: ของใหม่ หรือ ใช้ของเดิม =====
 type AddMode = 'new' | 'existing'
