@@ -69,7 +69,10 @@ function formatDate(dateStr: string | null) {
           @click="emit('view', item)"
         >
           <td class="whitespace-nowrap px-4 py-3 text-[var(--color-text-muted)]">{{ index + 1 }}</td>
-          <td class="whitespace-nowrap px-4 py-3 font-medium">{{ item.name }}</td>
+          <!-- มือถือ: บีบคอลัมน์ชื่อให้แคบแล้วตัดขึ้นบรรทัดใหม่ เพื่อให้เห็นคอลัมน์ประเภท (tag) ในจอ -->
+          <td class="px-4 py-3 font-medium">
+            <div class="w-28 wrap-anywhere sm:w-auto sm:whitespace-nowrap">{{ item.name }}</div>
+          </td>
           <td class="whitespace-nowrap px-4 py-3">
             <span
               v-if="item.tag"
